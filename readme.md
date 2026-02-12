@@ -14,3 +14,4 @@ The Hangarin is a simple web application built with Django,that helps users orga
 > 😎  **Miko R. Patindol**
 > 😎  **Jazchiel Angelou C. Gomez**    
 >  *Developer*
+
