@@ -10,7 +10,8 @@ The Hangarin is a simple web application built with Django,that helps users orga
 - Categorize Tasks
 - Breakdown large goals into subtasks
 
->### **Author**
-> 😎  **Miko R. Patindol**  
->  *Developer*  
-> 🤩  **Jazchiel Angelou C. Gomez**
+>### **Authors**
+> 😎  **Miko R. Patindol**
+> 😎  **Jazchiel Angelou C. Gomez**    
+>  *Developer*
+
