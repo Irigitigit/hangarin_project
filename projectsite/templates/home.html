@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} Hangarin - Dashboard {% endblock %}
+
+{% block header %}
+<div class="row">
+  <div class="col-lg-7 col-md-10">
+    <h1 class="display-2 text-white">Welcome to Hangarin</h1>
+    <p class="text-white mt-0 mb-5">Efficiently managing tasks for Puerto Princesa and Narra branches.</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-xl-12 mb-5 mb-xl-0">
+    <div class="card bg-default shadow">
+      <div class="card-header bg-transparent border-0">
+        <div class="row align-items-center">
+          <div class="col">
+            <h3 class="text-white mb-0">Task List</h3>
+          </div>
+          <div class="col text-right">
+            <a href="#!" class="btn btn-sm btn-primary">See all</a>
+          </div>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table align-items-center table-dark table-flush">
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col">Task Title</th>
+              <th scope="col">Deadline</th>
+              <th scope="col">Status</th>
+              <th scope="col">Priority</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Example Task</th>
+              <td>2026-03-20</td>
+              <td><span class="badge badge-dot mr-4"><i class="bg-warning"></i> Pending</span></td>
+              <td>High</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
