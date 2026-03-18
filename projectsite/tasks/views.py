@@ -1,30 +1,78 @@
+from multiprocessing import context
 from django.shortcuts import render
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from .models import Task, Priority, Category, Note, SubTask
+from django.utils import timezone
+from datetime import timedelta
+from django import forms
+from django.db.models import Q
+
+def home_view(request):
+    now = timezone.now()
+    three_days_from_now = now + timedelta(days=3)
+
+    # 1. High Priority Tasks
+    # Assumes your Priority model has a name field like 'High'
+    # TEMPORARY TEST: Change the filter to this to see if ANY tasks show up
+    active_critical_tasks = Task.objects.filter(
+        (Q(priority__name__icontains='High') | Q(priority__name__icontains='Crit'))
+    ).exclude(status__iexact='Completed').select_related('priority', 'category').order_by('-id')
+
+    # 2. Tasks Due Soon (Next 3 days)   
+    urgent_tasks = Task.objects.filter(
+        deadline__range=[now, three_days_from_now]
+    ).order_by('deadline')
+
+    context = {
+        'total_tasks': Task.objects.count(),
+        'total_categories': Category.objects.count(),
+        'total_notes': Note.objects.count(),
+        'my_tasks': active_critical_tasks,
+        'urgent_tasks': urgent_tasks,
+    }
+
+    return render(request, 'home.html', context)
+
+def about_view(request):
+    return render(request, 'about.html')
+
 
 # --- TASK CRUD ---
 class TaskListView(ListView):
     model = Task
-    context_object_name = 'tasks'
-    template_name = 'home.html'
+    context_object_name = 'items'
+    template_name = 'task_list.html'
 
 class TaskCreateView(CreateView):
     model = Task
-    fields = '__all__'
+    fields = ['title', 'description', 'deadline', 'status', 'category', 'priority']
     template_name = 'common_form.html'
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('task_list')
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # We change the 'deadline' widget to use the HTML5 datetime-local picker
+        form.fields['deadline'].widget = forms.DateTimeInput(
+            attrs={'type': 'datetime-local', 'class': 'form-control'},
+            format='%Y-%m-%dT%H:%M'
+        )
+        return form
+
+    def form_invalid(self, form):
+        print("Form Errors:", form.errors) # This helps you debug in the terminal
+        return super().form_invalid(form)
 
 class TaskUpdateView(UpdateView):
     model = Task
-    fields = '__all__'
+    fields = ['title', 'description', 'deadline', 'status', 'category', 'priority']
     template_name = 'common_form.html'
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('task_list')
 
 class TaskDeleteView(DeleteView):
     model = Task
     template_name = 'common_confirm_delete.html'
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('task_list')
 
 
 
@@ -54,7 +102,7 @@ class CategoryDeleteView(DeleteView):
 # --- PRIORITY ---
 class PriorityListView(ListView):
     model = Priority
-    template_name = 'priority_list.html' # You can create this next
+    template_name = 'priority_list.html'
     context_object_name = 'items'
 
 class PriorityCreateView(CreateView):
@@ -103,13 +151,13 @@ class SubTaskListView(ListView):
 
 class SubTaskCreateView(CreateView):
     model = SubTask
-    fields = ['name', 'task']
+    fields = ['title', 'status', 'parent_task']
     template_name = 'common_form.html'
     success_url = reverse_lazy('home')
 
 class SubTaskUpdateView(UpdateView):
     model = SubTask
-    fields = ['name', 'task']
+    fields = ['title', 'status', 'parent_task']
     template_name = 'common_form.html'
     success_url = reverse_lazy('home')
 

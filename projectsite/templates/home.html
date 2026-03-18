@@ -1,128 +1,154 @@
 {% extends 'base.html' %}
 
-{% block header %}
-<div class="header-body">
-  <div class="row">
-    <div class="col-xl-4 col-lg-6">
-      <div class="card card-stats mb-4 mb-xl-0">
-        <div class="card-body">
-          <div class="row">
-            <div class="col">
-              <h5 class="card-title text-uppercase text-muted mb-0">Total Tasks</h5>
-              <span class="h2 font-weight-bold mb-0">{{ total_tasks|default:"0" }}</span>
-            </div>
-            <div class="col-auto">
-              <div class="icon icon-shape bg-info text-white rounded-circle shadow">
-                <i class="fas fa-tasks"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    </div>
-</div>
-{% endblock %}
-
 {% block content %}
-<div class="row">
-  <div class="col">
-    <div class="card shadow">
-      <div class="card-header border-0">
-        <div class="row align-items-center">
-          <div class="col">
-            <h3 class="mb-0">Task List</h3>
-          </div>
-          
-          <div class="col-md-6">
-            <form method="GET" action="{% url 'home' %}" class="navbar-search form-inline d-flex">
-              <div class="form-group mb-0 w-100">
-                <div class="input-group input-group-alternative">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fas fa-search"></i></span>
-                  </div>
-                  <input class="form-control text-dark" placeholder="Search tasks..." type="text" name="q" value="{{ current_q }}">
+<div class="row mb-4">
+    <div class="col-xl-4 col-md-6">
+        <div class="card card-stats shadow-sm border-0 transition-300">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <h5 class="card-title text-uppercase text-muted mb-0">Total Tasks</h5>
+                        <span class="h2 font-weight-bold mb-0 text-primary">{{ total_tasks }}</span>
+                    </div>
+                    <div class="col-auto">
+                        <div class="icon icon-shape bg-gradient-primary text-white rounded-circle shadow">
+                            <i class="ni ni-check-bold"></i>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </form>
-          </div>
-
-          <div class="col text-right">
-            <a href="{% url 'task_create' %}" class="btn btn-sm btn-primary">Add Task</a>
-          </div>
+            </div>
         </div>
-      </div>
-
-      <div class="table-responsive">
-        <table class="table align-items-center table-flush">
-          <thead class="thead-light">
-            <tr>
-              <th scope="col">Task Name</th>
-              <th scope="col">Category</th>
-              <th scope="col">Priority</th>
-              <th scope="col">Status</th>
-              <th scope="col">Deadline</th>
-              <th scope="col" class="text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for task in tasks %}
-            <tr>
-              <th scope="row">
-                <span class="mb-0 text-sm font-weight-bold">{{ task.title }}</span>
-              </th>
-              <td>{{ task.category }}</td>
-              <td>
-                <span class="badge badge-dot mr-4">
-                  <i class="bg-warning"></i> {{ task.priority }}
-                </span>
-              </td>
-              <td>
-                <span class="badge badge-pill badge-success">{{ task.status }}</span>
-              </td>
-              <td>{{ task.deadline|date:"M d, Y H:i" }}</td>
-              <td class="text-right">
-                <a href="{% url 'task_update' task.pk %}" class="btn btn-sm btn-info">Edit</a>
-                <a href="{% url 'task_delete' task.pk %}" class="btn btn-sm btn-danger">Delete</a>
-              </td>
-            </tr>
-            {% empty %}
-            <tr>
-              <td colspan="6" class="text-center">No tasks found.</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-
-      {% if is_paginated %}
-      <div class="card-footer py-4">
-        <nav aria-label="...">
-          <ul class="pagination justify-content-end mb-0">
-            {% if page_obj.has_previous %}
-            <li class="page-item">
-              <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if current_q %}&q={{ current_q }}{% endif %}">
-                <i class="fas fa-angle-left"></i>
-              </a>
-            </li>
-            {% endif %}
-            
-            <li class="page-item active">
-              <a class="page-link" href="#">{{ page_obj.number }}</a>
-            </li>
-
-            {% if page_obj.has_next %}
-            <li class="page-item">
-              <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if current_q %}&q={{ current_q }}{% endif %}">
-                <i class="fas fa-angle-right"></i>
-              </a>
-            </li>
-            {% endif %}
-          </ul>
-        </nav>
-      </div>
-      {% endif %}
     </div>
-  </div>
+    <div class="col-xl-4 col-md-6">
+        <div class="card card-stats shadow-sm border-0 transition-300">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <h5 class="card-title text-uppercase text-muted mb-0">Active Categories</h5>
+                        <span class="h2 font-weight-bold mb-0 text-info">{{ total_categories }}</span>
+                    </div>
+                    <div class="col-auto">
+                        <div class="icon icon-shape bg-gradient-info text-white rounded-circle shadow">
+                            <i class="ni ni-tag"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4 col-md-12">
+        <div class="card card-stats shadow-sm border-0 transition-300">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <h5 class="card-title text-uppercase text-muted mb-0">Saved Notes</h5>
+                        <span class="h2 font-weight-bold mb-0 text-yellow">{{ total_notes }}</span>
+                    </div>
+                    <div class="col-auto">
+                        <div class="icon icon-shape bg-gradient-yellow text-white rounded-circle shadow">
+                            <i class="ni ni-paper-diploma"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<div class="row">
+    <div class="col-xl-4">
+        <div class="card shadow border-0 h-100">
+            <div class="card-header bg-transparent border-0">
+                <h3 class="mb-0 text-uppercase ls-1"><i class="ni ni-time-alarm text-danger mr-2"></i>Due Soon</h3>
+            </div>
+            <div class="card-body pt-0">
+                {% if urgent_tasks %}
+                    {% for task in urgent_tasks %}
+                    <div class="alert alert-secondary border-left-danger mb-3 shadow-sm transition-300">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0 font-weight-bold">{{ task.title }}</h4>
+                            <span class="badge badge-danger">{{ task.deadline|date:"M d" }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="ni ni-satisfied text-muted mb-2" style="font-size: 2rem;"></i>
+                        <p class="text-muted">No urgent deadlines.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-8">
+        <div class="card shadow border-0 h-100">
+            <div class="card-header bg-transparent border-0">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="mb-0 text-uppercase ls-1"><i class="ni ni-favourite-28 text-red mr-2"></i>Critical Focus</h3>
+                    </div>
+                    <div class="col text-right">
+                        <a href="{% url 'task_list' %}" class="btn btn-sm btn-outline-primary">View All Tasks</a>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-items-center table-flush table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Task Title</th>
+                            <th>Priority / Category</th>
+                            <th class="text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="list">
+                        {% for task in my_tasks %}
+                        <tr>
+                            <th scope="row">
+                                <span class="name mb-0 text-sm font-weight-bold text-dark">{{ task.title }}</span>
+                            </th>
+                            <td>
+                                <span class="badge badge-dot mr-4">
+                                    {% if task.priority.name|lower == 'critical' %}
+                                        <i class="bg-danger"></i>
+                                    {% else %}
+                                        <i class="bg-warning"></i>
+                                    {% endif %}
+                                    <span class="status">{{ task.priority.name }}</span>
+                                </span>
+                                <small class="text-muted d-block">{{ task.category.name }}</small>
+                            </td>
+                            <td class="text-center">
+                                {% if task.status|lower == 'pending' %}
+                                    <span class="badge badge-pill badge-warning">Pending</span>
+                                {% else %}
+                                    <span class="badge badge-pill badge-secondary">{{ task.status }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="ni ni-bulb-61 text-warning mb-3" style="font-size: 2rem;"></i>
+                                    <p>No High or Critical tasks found.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .transition-300 { transition: all 0.3s ease; }
+    .card-stats:hover { transform: translateY(-5px); }
+    .border-left-danger { border-left: 4px solid #f5365c !important; }
+    .dark-mode .card-stats { background-color: #262161 !important; }
+    .dark-mode .text-dark { color: #ffffff !important; }
+</style>
 {% endblock %}

@@ -55,37 +55,28 @@
                 <ul class="navbar-nav">
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">
-                            <i class="ni ni-tv-2"></i> Dashboard
+                            <i class="ni ni-chart-bar-32 text-primary"></i> Dashboard
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if 'priority' in request.path %}active{% endif %}" href="{% url 'priority_list' %}">
-                            <i class="ni ni-bullet-list-67 text-red"></i> Priorities
+                        <a class="nav-link {% if 'task' in request.path %}active{% endif %}" href="{% url 'task_list' %}">
+                            <i class="ni ni-check-bold text-green"></i> Tasks
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if 'category' in request.path %}active{% endif %}" href="{% url 'category_list' %}">
-                            <i class="ni ni-tag text-blue"></i> Categories
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if 'note' in request.path %}active{% endif %}" href="{% url 'note_list' %}">
-                            <i class="ni ni-paper-diploma text-yellow"></i> Notes
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if 'subtask' in request.path %}active{% endif %}" href="{% url 'subtask_list' %}">
-                            <i class="ni ni-check-bold text-green"></i> Subtasks
+                        <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'about' %}">
+                            <i class="ni ni-collection text-info"></i> About
                         </a>
                     </li>
                 </ul>
-                
+
                 <hr class="my-3">
-                <div class="text-center">
-                    <button id="dark-mode-toggle" class="btn btn-sm btn-outline-primary">
-                        <i class="ni ni-bulb-61"></i> Switch Theme
-                    </button>
-                </div>
+                <h6 class="navbar-heading text-muted">Configuration</h6>
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'priority_list' %}"><i class="ni ni-bullet-list-67 text-red"></i> Priorities</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'category_list' %}"><i class="ni ni-tag text-blue"></i> Categories</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'note_list' %}"><i class="ni ni-paper-diploma text-yellow"></i> Notes</a></li>
+                </ul>
             </div>
         </div>
     </nav>

@@ -39,14 +39,8 @@
                             <a href="{% url 'priority_edit' item.pk %}" class="btn btn-sm btn-outline-primary" title="Edit">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <button type="button" 
-                                    class="btn btn-sm btn-outline-danger" 
-                                    data-toggle="modal" 
-                                    data-target="#deleteModal" 
-                                    data-url="{% url 'priority_delete' item.pk %}" 
-                                    title="Delete">
+                            <a href="{% url 'priority_delete' item.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
                                 <i class="fas fa-trash"></i>
-                            </button> 
                             </a>
                         </div>
                     </td>   

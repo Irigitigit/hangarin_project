@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow border-0 mt-5">
+            <div class="card-body p-5 text-center">
+                <div class="icon icon-shape bg-gradient-info text-white rounded-circle shadow mb-4">
+                    <i class="ni ni-collection"></i>
+                </div>
+                <h1 class="display-4">About Hangarin</h1>
+                <p class="lead text-muted">A dedicated Task Management System built for precision and organization.</p>
+                <hr class="my-4">
+                <p>This project was developed to centralize student tasks, categories, and priorities into one seamless dashboard.</p>
+                <a href="{% url 'home' %}" class="btn btn-primary mt-4">Back to Insights</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
