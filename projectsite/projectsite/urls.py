@@ -16,7 +16,39 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from tasks import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', views.TaskListView.as_view(), name='home'),
+    
+    # Task URLs
+    path('tasks/create/', views.TaskCreateView.as_view(), name='task_create'),
+    path('tasks/<int:pk>/update/', views.TaskUpdateView.as_view(), name='task_update'),
+    path('tasks/<int:pk>/delete/', views.TaskDeleteView.as_view(), name='task_delete'),
+
+    # Category URLs (THIS FIXES YOUR ERROR)
+    path('categories/', views.CategoryListView.as_view(), name='category_list'),
+    path('categories/add/', views.CategoryCreateView.as_view(), name='category_add'),
+    path('categories/<int:pk>/edit/', views.CategoryUpdateView.as_view(), name='category_edit'),
+    path('categories/<int:pk>/delete/', views.CategoryDeleteView.as_view(), name='category_delete'),
+
+    # Priority URLs
+    path('priorities/', views.PriorityListView.as_view(), name='priority_list'),
+    path('priorities/add/', views.PriorityCreateView.as_view(), name='priority_add'),
+    path('priorities/<int:pk>/edit/', views.PriorityUpdateView.as_view(), name='priority_edit'),
+    path('priorities/<int:pk>/delete/', views.PriorityDeleteView.as_view(), name='priority_delete'),
+
+    # Note URLs
+    path('notes/', views.NoteListView.as_view(), name='note_list'),
+    path('notes/add/', views.NoteCreateView.as_view(), name='note_add'),
+    path('notes/<int:pk>/edit/', views.NoteUpdateView.as_view(), name='note_edit'),
+    path('notes/<int:pk>/delete/', views.NoteDeleteView.as_view(), name='note_delete'),
+
+    # SubTask URLs
+    path('subtasks/', views.SubTaskListView.as_view(), name='subtask_list'),
+    path('subtasks/add/', views.SubTaskCreateView.as_view(), name='subtask_add'),
+    path('subtasks/<int:pk>/edit/', views.SubTaskUpdateView.as_view(), name='subtask_edit'),
+    path('subtasks/<int:pk>/delete/', views.SubTaskDeleteView.as_view(), name='subtask_delete'),
+
 ]

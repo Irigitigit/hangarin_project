@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %} 
+<div class="card shadow border-0">
+    <div class="card-header border-0 bg-transparent">
+        <div class="row align-items-center">
+            <div class="col">
+                <h3 class="mb-0 text-uppercase ls-1">Categories</h3>
+            </div>
+            <div class="col text-right">
+                <a href="{% url 'category_add' %}" class="btn btn-sm btn-primary shadow-sm">
+                    <i class="fas fa-plus mr-1"></i> Add Category
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table align-items-center table-flush">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">Category Name</th>
+                    <th scope="col" class="text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="list">
+                {% for item in items %}
+                <tr class="hover-shadow-sm transition-300">
+                    <td class="font-weight-600 text-dark">
+                        <div class="media align-items-center">
+                            <span class="avatar avatar-xs rounded-circle bg-soft-blue mr-3">
+                                <i class="ni ni-tag text-blue" style="font-size: 0.7rem;"></i>
+                            </span>
+                            <span class="mb-0 text-sm">{{ item.name }}</span>
+                        </div>
+                    </td>
+                    <td class="text-right">
+                        <div class="btn-group">
+                            <a href="{% url 'category_edit' item.pk %}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'category_delete' item.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </td>   
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="text-center py-6 bg-secondary-soft">
+                        <div class="empty-state">
+                            <i class="ni ni-tag text-muted mb-3" style="font-size: 3rem; display: block;"></i>
+                            <h4 class="text-muted font-weight-light">No categories defined yet.</h4>
+                            <p class="text-sm text-muted">Organize your tasks by creating a category.</p>
+                            <a href="{% url 'category_add' %}" class="btn btn-link text-primary mt-2">Create New Category</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    /* UI Smoothness */
+    .transition-300 { transition: all 0.3s ease; }
+    .hover-shadow-sm:hover { 
+        background-color: rgba(94, 114, 228, 0.03); 
+    }
+    .bg-soft-blue { background-color: #eaf2ff; }
+    
+    /* Dark Mode Adjustments */
+    .dark-mode .bg-soft-blue { background-color: #2d3d5d; }
+    .dark-mode .text-dark { color: #ffffff !important; }
+    .dark-mode .bg-secondary-soft { background-color: #1a174d; }
+    
+    /* Ensuring the card header doesn't have a white border in dark mode */
+    .dark-mode .card-header { border-bottom: 1px solid #32325d !important; }
+</style>
+{% endblock %}

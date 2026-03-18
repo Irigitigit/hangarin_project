@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="card bg-secondary shadow border-0">
+    <div class="card-header bg-white pb-3">
+        <h3 class="mb-0">Manage Entry</h3>
+    </div>
+    <div class="card-body px-lg-5 py-lg-5">
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label class="form-control-label">{{ field.label }}</label>
+                {% render_field field class="form-control form-control-alternative" %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
