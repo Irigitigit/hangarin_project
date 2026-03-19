@@ -12,28 +12,24 @@
     <link href="{% static 'css/argon-dashboard.css' %}" rel="stylesheet" />
     
     <style>
-        /* Smooth UI Enhancements */
-        :root {
-            --transition-speed: 0.3s;
-        }
+        :root { --transition-speed: 0.3s; }
 
-        /* Dark Mode Variables */
-        body.dark-mode {
-            background-color: #1a174d !important;
-            color: #e9ecef;
+        /* --- Dark Mode Fixes --- */
+        body.dark-mode { background-color: #10102b !important; color: #e9ecef; }
+        
+        .dark-mode .navbar-vertical { background-color: #171738 !important; border-color: #2e2e5d !important; }
+        .dark-mode .navbar-vertical .nav-link:not(.active) { color: #adb5bd !important; }
+        
+        .dark-mode .card, .dark-mode .thead-light th { 
+            background-color: #1c1c44 !important; 
+            color: #ffffff !important; 
+            border-color: #2e2e5d !important; 
         }
-        .dark-mode .card, .dark-mode .navbar-vertical, .dark-mode .thead-light th {
-            background-color: #262161 !important;
-            color: #ffffff !important;
-            border-color: #32325d !important;
-        }
-        .dark-mode .table td, .dark-mode .table th {
-            color: #cbd5e0 !important;
-            border-top: 1px solid #32325d;
-        }
+        .dark-mode .table td { color: #cbd5e0 !important; border-top: 1px solid #2e2e5d; }
         .dark-mode .text-muted { color: #8898aa !important; }
+        .dark-mode .main-content .header { background: linear-gradient(87deg, #172b4d 0, #1a174d 100%) !important; }
 
-        /* Smooth Sidebar */
+        /* --- Sidebar Active States --- */
         .nav-item .nav-link { transition: all var(--transition-speed); border-radius: 8px; margin: 0 10px; }
         .nav-item .nav-link.active {
             background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important;
@@ -47,6 +43,10 @@
 <body>
     <nav class="navbar navbar-vertical fixed-left navbar-expand-md navbar-light bg-white" id="sidenav-main">
         <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#sidenav-collapse-main">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
             <a class="navbar-brand pt-0" href="{% url 'home' %}">
                 <h2 class="text-primary font-weight-bold" style="letter-spacing: 2px;">HANGARIN</h2>
             </a>
@@ -68,14 +68,27 @@
                             <i class="ni ni-collection text-info"></i> About
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'note' in request.path %}active{% endif %}" href="{% url 'note_list' %}">
+                            <i class="ni ni-paper-diploma text-yellow"></i> Notes
+                        </a>
+                    </li>
                 </ul>
-
+                
                 <hr class="my-3">
                 <h6 class="navbar-heading text-muted">Configuration</h6>
                 <ul class="navbar-nav">
                     <li class="nav-item"><a class="nav-link" href="{% url 'priority_list' %}"><i class="ni ni-bullet-list-67 text-red"></i> Priorities</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'category_list' %}"><i class="ni ni-tag text-blue"></i> Categories</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'note_list' %}"><i class="ni ni-paper-diploma text-yellow"></i> Notes</a></li>
+                </ul>
+
+                <hr class="my-3">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0)" id="dark-mode-toggle">
+                            <i class="ni ni-palette text-darker"></i> <span>Change Theme</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -92,48 +105,15 @@
         </div>
     </div>
 
-   <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content shadow border-0">
-                <div class="modal-header bg-transparent border-0">
-                    <h5 class="modal-title text-uppercase ls-1" id="deleteModalLabel">Confirm Deletion</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center py-4">
-                    <i class="fas fa-exclamation-triangle text-danger mb-3" style="font-size: 3rem;"></i>
-                    <p class="text-muted">Are you sure you want to delete this item? <br> <span class="text-danger font-weight-bold">This action cannot be undone.</span></p>
-                </div>
-                <div class="modal-footer bg-secondary-soft border-0">
-                    <button type="button" class="btn btn-link text-muted ml-auto" data-dismiss="modal">Cancel</button>
-                    
-                    <form id="deleteForm" method="POST" action="">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger shadow-sm">Delete Permanently</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        $('#deleteModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget); 
-            var deleteUrl = button.data('url'); 
-            var modal = $(this);
-            // This updates the 'action' attribute of the form instead of an 'href'
-            modal.find('#deleteForm').attr('action', deleteUrl);
-        });
-    </script>
-
     <script src="{% static 'js/plugins/jquery/dist/jquery.min.js' %}"></script>
     <script src="{% static 'js/plugins/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+    
     <script>
-        // Theme Persistence Script
+        // Theme Persistence Logic
         const toggle = document.getElementById('dark-mode-toggle');
         const body = document.body;
 
+        // Apply theme on load
         if (localStorage.getItem('theme') === 'dark') {
             body.classList.add('dark-mode');
         }

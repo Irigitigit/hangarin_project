@@ -15,6 +15,54 @@
         </div>
     </div>
 
+    <div class="px-4 pb-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-3">
+                <div class="input-group input-group-alternative shadow-sm">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    </div>
+                    <input type="text" name="q" class="form-control" placeholder="Search..." value="{{ request.GET.q }}">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary px-3" type="submit">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <select name="status" class="form-control form-control-alternative shadow-sm" onchange="this.form.submit()">
+                    <option value="">All Statuses</option>
+                    <option value="Pending" {% if request.GET.status == "Pending" %}selected{% endif %}>Pending</option>
+                    <option value="In Progress" {% if request.GET.status == "In Progress" %}selected{% endif %}>In Progress</option>
+                    <option value="Completed" {% if request.GET.status == "Completed" %}selected{% endif %}>Completed</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <select name="category" class="form-control form-control-alternative shadow-sm" onchange="this.form.submit()">
+                    <option value="">All Categories</option>
+                    <option value="Work" {% if request.GET.category == "Work" %}selected{% endif %}>Work</option>
+                    <option value="School" {% if request.GET.category == "School" %}selected{% endif %}>School</option>
+                    <option value="Personal" {% if request.GET.category == "Personal" %}selected{% endif %}>Personal</option>
+                    <option value="Projects" {% if request.GET.category == "Projects" %}selected{% endif %}>Projects</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <select name="priority" class="form-control form-control-alternative shadow-sm" onchange="this.form.submit()">
+                    <option value="">All Priorities</option>
+                    <option value="Critical" {% if request.GET.priority == "Critical" %}selected{% endif %}>Critical</option>
+                    <option value="High" {% if request.GET.priority == "High" %}selected{% endif %}>High</option>
+                    <option value="Medium" {% if request.GET.priority == "Medium" %}selected{% endif %}>Medium</option>
+                    <option value="Low" {% if request.GET.priority == "Low" %}selected{% endif %}>Low</option>
+                    <option value="Optional" {% if request.GET.priority == "Optional" %}selected{% endif %}>Optional</option>
+                </select>
+            </div>
+        </form>
+    </div>
+
     <div class="table-responsive">
         <table class="table align-items-center table-flush">
             <thead class="thead-light">
@@ -30,66 +78,96 @@
                 {% for item in items %}
                 <tr class="hover-shadow-sm transition-300">
                     <td class="font-weight-600 text-dark">
-                        <div class="media align-items-center">
-                            <div>
-                                <span class="mb-0 text-sm d-block">{{ item.title }}</span>
-                                <small class="text-muted">{{ item.status }}</small>
+                        <a href="javascript:void(0)" data-toggle="modal" data-target="#taskModal-{{ item.pk }}" class="text-primary" style="text-decoration: none;">
+                            <div class="media align-items-center">
+                                <div>
+                                    <span class="mb-0 text-sm d-block font-weight-bold">{{ item.title }}</span>
+                                    <small class="text-muted">{{ item.status }}</small>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </td>
+                    <td><span class="badge badge-info badge-pill shadow-none">{{ item.category }}</span></td>
                     <td>
-                        <span class="badge badge-info badge-pill">{{ item.category }}</span>
-                    </td>
-                    <td>
-                        {% if item.priority.name|lower == 'high' %}
-                            <span class="badge badge-dot mr-4"><i class="bg-danger"></i> {{ item.priority }}</span>
+                        {% if item.priority.name|lower == 'critical' %}
+                            <span class="badge badge-dot mr-4"><i class="bg-danger"></i> <b class="text-danger">CRITICAL</b></span>
+                        {% elif item.priority.name|lower == 'high' %}
+                            <span class="badge badge-dot mr-4"><i class="bg-orange"></i> High</span>
                         {% elif item.priority.name|lower == 'medium' %}
-                            <span class="badge badge-dot mr-4"><i class="bg-warning"></i> {{ item.priority }}</span>
+                            <span class="badge badge-dot mr-4"><i class="bg-warning"></i> Medium</span>
+                        {% elif item.priority.name|lower == 'low' %}
+                            <span class="badge badge-dot mr-4"><i class="bg-success"></i> Low</span>
                         {% else %}
-                            <span class="badge badge-dot mr-4"><i class="bg-success"></i> {{ item.priority }}</span>
+                            <span class="badge badge-dot mr-4"><i class="bg-secondary"></i> Optional</span>
                         {% endif %}
                     </td>
                     <td>
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center text-sm">
                             <i class="ni ni-calendar-grid-58 text-muted mr-2"></i>
-                            <span class="text-sm">{{ item.deadline|date:"M d, Y" }}</span>
+                            {{ item.deadline|date:"M d, Y" }}
                         </div>
                     </td>
                     <td class="text-right">
                         <div class="btn-group">
-                            <a href="{% url 'task_update' item.pk %}" class="btn btn-sm btn-outline-primary" title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <a href="{% url 'task_delete' item.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
-                                <i class="fas fa-trash"></i>
-                            </a>
+                            <a href="{% url 'task_update' item.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                            <a href="{% url 'task_delete' item.pk %}" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>
                         </div>
                     </td>   
                 </tr>
+
+                <div class="modal fade" id="taskModal-{{ item.pk }}" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content border-0 shadow-lg">
+                            <div class="modal-header bg-secondary">
+                                <h5 class="modal-title text-uppercase ls-1">Task Details</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <div class="mb-4 text-center">
+                                    <h2 class="display-4 mb-1 text-primary">{{ item.title }}</h2>
+                                    <span class="badge badge-pill badge-info">{{ item.category }}</span>
+                                </div>
+                                <hr class="my-3">
+                                <div class="row mb-3 text-center">
+                                    <div class="col-6 border-right">
+                                        <small class="text-muted text-uppercase d-block mb-1">Priority</small>
+                                        <span class="font-weight-bold">{{ item.priority }}</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted text-uppercase d-block mb-1">Status</small>
+                                        <span class="badge badge-pill badge-warning">{{ item.status }}</span>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-muted text-uppercase font-weight-bold">Description</small>
+                                    <p class="mt-1 text-sm text-dark">{{ item.description|default:"No description provided." }}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-muted text-uppercase font-weight-bold">Notes</small>
+                                    <p class="mt-1 text-sm italic text-muted">{{ item.note|default:"N/A" }}</p>
+                                </div>
+                                <div class="text-center mt-4">
+                                    <small class="text-muted text-uppercase d-block mb-1">Deadline</small>
+                                    <span class="text-sm"><i class="ni ni-calendar-grid-58 mr-1"></i>{{ item.deadline|date:"M d, Y"|default:"No Deadline" }}</span>
+                                </div>
+                            </div>
+                            <div class="modal-footer bg-secondary">
+                                <a href="{% url 'task_update' item.pk %}" class="btn btn-sm btn-primary">Edit Task</a>
+                                <button type="button" class="btn btn-sm btn-link text-muted ml-auto" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {% empty %}
                 <tr>
-                    <td colspan="5" class="text-center py-6 bg-secondary-soft">
-                        <div class="empty-state">
-                            <i class="ni ni-folder-17 text-muted mb-3" style="font-size: 3rem; display: block;"></i>
-                            <h4 class="text-muted font-weight-light">No tasks found yet.</h4>
-                            <a href="{% url 'task_add' %}" class="btn btn-link text-primary mt-2">Create your first task</a>
-                        </div>
-                    </td>
+                    <td colspan="5" class="text-center py-5">No tasks found.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
-
-<style>
-    .transition-300 { transition: all 0.3s ease; }
-    .hover-shadow-sm:hover { background-color: rgba(94, 114, 228, 0.03); }
-    .bg-soft-primary { background-color: #e8ebfa; }
-    
-    /* Ensuring table headers look clean in dark mode */
-    .dark-mode .thead-light th { background-color: #1a174d !important; border-color: #32325d !important; }
-    .dark-mode .text-dark { color: #ffffff !important; }
-    .dark-mode .bg-secondary-soft { background-color: #1a174d; }
-</style>
 {% endblock %}

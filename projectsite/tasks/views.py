@@ -1,4 +1,5 @@
 from multiprocessing import context
+from urllib import request
 from django.shortcuts import render
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
@@ -43,6 +44,42 @@ class TaskListView(ListView):
     model = Task
     context_object_name = 'items'
     template_name = 'task_list.html'
+
+    def get_queryset(self):
+        # 1. Start with the base queryset
+        queryset = Task.objects.all().select_related('priority', 'category')
+        
+        # 2. Grab filters from the request
+        query = self.request.GET.get('q')
+        priority_filter = self.request.GET.get('priority')
+        category_filter = self.request.GET.get('category')
+        status_filter = self.request.GET.get('status')
+
+        # 3. Apply filters if they exist
+        if query:
+            queryset = queryset.filter(
+                Q(title__icontains=query) | Q(description__icontains=query)
+            )
+        
+        if category_filter:
+            queryset = queryset.filter(category__name__iexact=category_filter)
+        if priority_filter:
+            queryset = queryset.filter(priority__name__iexact=priority_filter)
+            
+        if status_filter:
+            queryset = queryset.filter(status__iexact=status_filter)
+
+        # 4. Return the QuerySet (Django handles the rendering automatically)
+        return queryset.order_by('-id')
+
+    def get_context_data(self, **kwargs):
+        # This keeps your search/filter values "sticky" in the search bars/dropdowns
+        context = super().get_context_data(**kwargs)
+        context['query'] = self.request.GET.get('q', '')
+        context['selected_priority'] = self.request.GET.get('priority', '')
+        context['selected_status'] = self.request.GET.get('status', '')
+        return context
+
 
 class TaskCreateView(CreateView):
     model = Task
