@@ -6,8 +6,11 @@ from django.utils import timezone
 from datetime import timedelta
 from django import forms
 from django.db.models import Q
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 
 # --- DASHBOARD & ABOUT ---
+@login_required
 def home_view(request):
     now = timezone.now()
     three_days_from_now = now + timedelta(days=3)
@@ -34,7 +37,7 @@ def about_view(request):
 
 
 # --- TASK CRUD ---
-class TaskListView(ListView):
+class TaskListView(LoginRequiredMixin, ListView):
     model = Task
     context_object_name = 'items'
     template_name = 'task_list.html'
@@ -57,7 +60,7 @@ class TaskListView(ListView):
 
         return queryset.order_by('-id')
 
-class TaskCreateView(CreateView):
+class TaskCreateView(LoginRequiredMixin, CreateView):
     model = Task
     fields = ['title', 'description', 'deadline', 'status', 'category', 'priority']
     template_name = 'common_form.html'
@@ -71,20 +74,20 @@ class TaskCreateView(CreateView):
         )
         return form
 
-class TaskUpdateView(UpdateView):
+class TaskUpdateView(LoginRequiredMixin, UpdateView):
     model = Task
     fields = ['title', 'description', 'deadline', 'status', 'category', 'priority']
     template_name = 'common_form.html'
     success_url = reverse_lazy('task_list')
 
-class TaskDeleteView(DeleteView):
+class TaskDeleteView(LoginRequiredMixin, DeleteView):
     model = Task
     template_name = 'common_confirm_delete.html'
     success_url = reverse_lazy('task_list')
 
 
 # --- CATEGORY CRUD ---
-class CategoryListView(ListView):
+class CategoryListView(LoginRequiredMixin, ListView):
     model = Category
     template_name = 'category_list.html'
     context_object_name = 'items'
@@ -96,50 +99,50 @@ class CategoryListView(ListView):
             queryset = queryset.filter(name__icontains=query)
         return queryset.order_by('name')
 
-class CategoryCreateView(CreateView):
+class CategoryCreateView(LoginRequiredMixin, CreateView):
     model = Category
     fields = ['name']
     template_name = 'common_form.html'
     success_url = reverse_lazy('category_list')
 
-class CategoryUpdateView(UpdateView):
+class CategoryUpdateView(LoginRequiredMixin, UpdateView):
     model = Category
     fields = ['name']
     template_name = 'common_form.html'
     success_url = reverse_lazy('category_list')
 
-class CategoryDeleteView(DeleteView):
+class CategoryDeleteView(LoginRequiredMixin, DeleteView):
     model = Category
     template_name = 'common_confirm_delete.html'
     success_url = reverse_lazy('category_list')
 
 
 # --- PRIORITY CRUD ---
-class PriorityListView(ListView):
+class PriorityListView(LoginRequiredMixin, ListView):
     model = Priority
     template_name = 'priority_list.html'
     context_object_name = 'items'
 
-class PriorityCreateView(CreateView):
+class PriorityCreateView(LoginRequiredMixin, CreateView):
     model = Priority
     fields = ['name']
     template_name = 'common_form.html'
     success_url = reverse_lazy('priority_list')
 
-class PriorityUpdateView(UpdateView):
+class PriorityUpdateView(LoginRequiredMixin, UpdateView):
     model = Priority
     fields = ['name']
     template_name = 'common_form.html'
     success_url = reverse_lazy('priority_list')
 
-class PriorityDeleteView(DeleteView):
+class PriorityDeleteView(LoginRequiredMixin, DeleteView):
     model = Priority
     template_name = 'common_confirm_delete.html'
     success_url = reverse_lazy('priority_list')
 
 
 # --- NOTE CRUD ---
-class NoteListView(ListView):
+class NoteListView(LoginRequiredMixin,ListView):
     model = Note
     template_name = 'note_list.html'
     context_object_name = 'items'
@@ -156,26 +159,26 @@ class NoteListView(ListView):
 
         return queryset.order_by('-created_at')
 
-class NoteCreateView(CreateView):
+class NoteCreateView(LoginRequiredMixin, CreateView):
     model = Note
     fields = ['content', 'task']
     template_name = 'common_form.html'
     success_url = reverse_lazy('note_list') 
 
-class NoteUpdateView(UpdateView):
+class NoteUpdateView(LoginRequiredMixin, UpdateView):
     model = Note
     fields = ['content', 'task']
     template_name = 'common_form.html'
     success_url = reverse_lazy('note_list')
 
-class NoteDeleteView(DeleteView):
+class NoteDeleteView(LoginRequiredMixin, DeleteView):
     model = Note
     template_name = 'common_confirm_delete.html'
     success_url = reverse_lazy('note_list')
 
 
 # --- SUBTASK CRUD ---
-class SubTaskListView(ListView):    
+class SubTaskListView(LoginRequiredMixin, ListView):    
     model = SubTask
     template_name = 'subtask_list.html'
     context_object_name = 'items'
@@ -193,19 +196,19 @@ class SubTaskListView(ListView):
 
         return queryset
 
-class SubTaskCreateView(CreateView):
+class SubTaskCreateView(LoginRequiredMixin, CreateView):
     model = SubTask
     fields = ['title', 'status', 'parent_task']
     template_name = 'common_form.html'
     success_url = reverse_lazy('subtask_list')
 
-class SubTaskUpdateView(UpdateView):
+class SubTaskUpdateView(LoginRequiredMixin, UpdateView):
     model = SubTask
     fields = ['title', 'status', 'parent_task']
     template_name = 'common_form.html'
     success_url = reverse_lazy('subtask_list')
 
-class SubTaskDeleteView(DeleteView):
+class SubTaskDeleteView(LoginRequiredMixin, DeleteView):
     model = SubTask
     template_name = 'common_confirm_delete.html'
     success_url = reverse_lazy('subtask_list')

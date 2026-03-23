@@ -1,4 +1,5 @@
-{% load socialaccount %} {% load static %}
+{% load socialaccount %} 
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,6 +24,7 @@
             min-height: 100vh;
             background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important;
             font-family: 'Open Sans', sans-serif;
+            margin: 0;
         }
 
         /* --- Dark Mode Support --- */
@@ -62,6 +64,11 @@
             text-align: center;
             margin-bottom: 1.5rem;
         }
+        
+        .btn-outline-dark:hover {
+            background-color: #333 !important;
+            color: white !important;
+        }
     </style>
 </head>
 
@@ -86,10 +93,10 @@
                     {% csrf_token %}
                     <div class="text-center mb-3">
                         <p class="text-sm">Sign in with:</p>
-                        <a href="{% provider_login_url 'google' %}" class="btn btn-outline-primary btn-floating mx-1">
+                        <a href="{% provider_login_url 'google' %}" class="btn btn-outline-primary btn-floating mx-1 shadow-sm">
                             <i class="fab fa-google"></i>
                         </a>
-                        <a href="#" class="btn btn-outline-primary btn-floating mx-1">
+                        <a href="{% provider_login_url 'github' %}" class="btn btn-outline-dark btn-floating mx-1 shadow-sm">
                             <i class="fab fa-github"></i>
                         </a>
                     </div>
@@ -109,13 +116,13 @@
                     </div>
 
                     <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="loginCheck" checked>
-                                <label class="custom-control-label text-sm" for="loginCheck">Remember me</label>
+                        <div class="col-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="remember" id="loginCheck" checked />
+                                <label class="form-check-label text-sm" for="loginCheck"> Remember me </label>
                             </div>
                         </div>
-                        <div class="col-md-6 text-right">
+                        <div class="col-6 text-end">
                             <a href="{% url 'account_reset_password' %}" class="text-sm">Forgot?</a>
                         </div>
                     </div>
@@ -129,8 +136,11 @@
                     {% csrf_token %}
                     <div class="text-center mb-3">
                         <p class="text-sm">Quick register with:</p>
-                        <a href="{% provider_login_url 'google' %}" class="btn btn-outline-primary btn-floating mx-1">
+                        <a href="{% provider_login_url 'google' %}" class="btn btn-outline-primary btn-floating mx-1 shadow-sm">
                             <i class="fab fa-google"></i>
+                        </a>
+                        <a href="{% provider_login_url 'github' %}" class="btn btn-outline-dark btn-floating mx-1 shadow-sm">
+                            <i class="fab fa-github"></i>
                         </a>
                     </div>
 

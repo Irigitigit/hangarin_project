@@ -12,82 +12,64 @@
     <link href="{% static 'css/argon-dashboard.css' %}" rel="stylesheet" />
     
     <style>
-        :root { --transition-speed: 0.3s; }
-
-        /* --- Dark Mode Fixes --- */
-        body.dark-mode { background-color: #10102b !important; color: #e9ecef; }
-        
+        /* --- Robust Dark Mode --- */
+        body.dark-mode { background-color: #10102b !important; color: #ffffff !important; }
         .dark-mode .navbar-vertical { background-color: #171738 !important; border-color: #2e2e5d !important; }
-        .dark-mode .navbar-vertical .nav-link:not(.active) { color: #adb5bd !important; }
+        .dark-mode .navbar-vertical .nav-link { color: #adb5bd !important; }
+        .dark-mode .navbar-vertical .nav-link:hover { color: #ffffff !important; }
         
+        /* Text Contrast Fix for Dark Mode */
+        .dark-mode h1, .dark-mode h2, .dark-mode h3, .dark-mode h4, .dark-mode h5, .dark-mode h6,
+        .dark-mode p, .dark-mode span, .dark-mode label, .dark-mode td, .dark-mode th {
+            color: #ffffff !important;
+        }
+
+        /* Card & Table Fixes */
         .dark-mode .card, .dark-mode .thead-light th { 
             background-color: #1c1c44 !important; 
-            color: #ffffff !important; 
             border-color: #2e2e5d !important; 
         }
-        .dark-mode .table td { color: #cbd5e0 !important; border-top: 1px solid #2e2e5d; }
+        .dark-mode .table td, .dark-mode .table th { border-top: 1px solid #2e2e5d; }
         .dark-mode .text-muted { color: #8898aa !important; }
-        .dark-mode .main-content .header { background: linear-gradient(87deg, #172b4d 0, #1a174d 100%) !important; }
+        
+        /* Dropdown Fixes */
+        .dark-mode .dropdown-menu { background-color: #1c1c44 !important; border: 1px solid #2e2e5d; }
+        .dark-mode .dropdown-item { color: #adb5bd !important; }
+        .dark-mode .dropdown-item:hover { background-color: #2e2e5d !important; color: #ffffff !important; }
+        .dark-mode .dropdown-divider { border-top: 1px solid #2e2e5d; }
 
-        /* --- Sidebar Active States --- */
-        .nav-item .nav-link { transition: all var(--transition-speed); border-radius: 8px; margin: 0 10px; }
-        .nav-item .nav-link.active {
-            background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important;
-            color: white !important;
-            box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgba(94,114,228,.4);
-        }
-        .nav-item .nav-link.active i { color: white !important; }
+        /* Avatar */
+        .avatar img { width: 36px; height: 36px; object-fit: cover; border-radius: 50%; }
+        
+        /* Alert Styling */
+        .alert { z-index: 1080; }
     </style>
 </head>
 
-<body>
+<body class="{% if not user.is_authenticated %}bg-gradient-primary{% endif %}">
+    
+    {% if user.is_authenticated %}
     <nav class="navbar navbar-vertical fixed-left navbar-expand-md navbar-light bg-white" id="sidenav-main">
         <div class="container-fluid">
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#sidenav-collapse-main">
                 <span class="navbar-toggler-icon"></span>
             </button>
-
             <a class="navbar-brand pt-0" href="{% url 'home' %}">
                 <h2 class="text-primary font-weight-bold" style="letter-spacing: 2px;">HANGARIN</h2>
             </a>
-
             <div class="collapse navbar-collapse" id="sidenav-collapse-main">
                 <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">
-                            <i class="ni ni-chart-bar-32 text-primary"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if 'task' in request.path and 'subtask' not in request.path %}active{% endif %}" href="{% url 'task_list' %}">
-                            <i class="ni ni-check-bold text-green"></i> Tasks
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link {% if 'subtask' in request.path %}active{% endif %}" href="{% url 'subtask_list' %}">
-                            <i class="ni ni-bullet-list-67 text-info"></i> Subtasks
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if 'note' in request.path %}active{% endif %}" href="{% url 'note_list' %}">
-                            <i class="ni ni-paper-diploma text-yellow"></i> Notes
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'about' %}">
-                            <i class="ni ni-collection text-info"></i> About
-                        </a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}"><i class="ni ni-chart-bar-32 text-primary"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link {% if 'task' in request.path and 'subtask' not in request.path %}active{% endif %}" href="{% url 'task_list' %}"><i class="ni ni-check-bold text-green"></i> Tasks</a></li>
+                    <li class="nav-item"><a class="nav-link {% if 'subtask' in request.path %}active{% endif %}" href="{% url 'subtask_list' %}"><i class="ni ni-bullet-list-67 text-info"></i> Subtasks</a></li>
+                    <li class="nav-item"><a class="nav-link {% if 'note' in request.path %}active{% endif %}" href="{% url 'note_list' %}"><i class="ni ni-paper-diploma text-yellow"></i> Notes</a></li>
                 </ul>
-                
                 <hr class="my-3">
                 <h6 class="navbar-heading text-muted">Configuration</h6>
                 <ul class="navbar-nav">
                     <li class="nav-item"><a class="nav-link" href="{% url 'priority_list' %}"><i class="ni ni-bullet-list-67 text-red"></i> Priorities</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'category_list' %}"><i class="ni ni-tag text-blue"></i> Categories</a></li>
                 </ul>
-
                 <hr class="my-3">
                 <ul class="navbar-nav">
                     <li class="nav-item">
@@ -101,34 +83,90 @@
     </nav>
 
     <div class="main-content">
-        <div class="header bg-gradient-primary pb-8 pt-5 pt-md-8">
+        <nav class="navbar navbar-top navbar-expand-md navbar-dark" id="navbar-main">
             <div class="container-fluid">
-                {% block header %}{% endblock %}
+                <span class="h4 mb-0 text-white text-uppercase d-none d-lg-inline-block">Task Management System</span>
+                <ul class="navbar-nav align-items-center d-none d-md-flex">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link pr-0" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <div class="media align-items-center">
+                                <span class="avatar avatar-sm rounded-circle">
+                                    {% if user.socialaccount_set.all.0.get_avatar_url %}
+                                        <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}">
+                                    {% else %}
+                                        <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=random">
+                                    {% endif %}
+                                </span>
+                                <div class="media-body ml-2 d-none d-lg-block">
+                                    <span class="mb-0 text-sm font-weight-bold text-white">{{ user.username }}</span>
+                                </div>
+                            </div>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-right">
+                            <div class="dropdown-header noti-title"><h6 class="text-overflow m-0">Welcome!</h6></div>
+                            <div class="dropdown-divider"></div>
+                            <form method="post" action="{% url 'account_logout' %}" id="logout-form">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
+                                    <i class="ni ni-user-run"></i> 
+                                    <span>Logout</span>
+                                </button>
+                            </form>
+                        </div>
+                    </li>
+                </ul>
             </div>
+        </nav>
+        
+        <div class="header bg-gradient-primary pb-8 pt-5 pt-md-8">
+            <div class="container-fluid">{% block header %}{% endblock %}</div>
         </div>
         <div class="container-fluid mt--7">
             {% block content %}{% endblock %}
         </div>
     </div>
 
+    {% else %}
+    <div class="main-content d-flex align-items-center" style="min-height: 100vh;">
+        <div class="container">
+            {% if messages %}
+            <div class="row justify-content-center">
+                <div class="col-lg-5 col-md-7">
+                    {% for message in messages %}
+                    <div class="alert alert-secondary alert-dismissible fade show mb-4" role="alert">
+                        <span class="text-sm">{{ message }}</span>
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="row justify-content-center">
+                <div class="col-lg-5 col-md-7">
+                    {% block guest_content %}{% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <script src="{% static 'js/plugins/jquery/dist/jquery.min.js' %}"></script>
     <script src="{% static 'js/plugins/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
-    
     <script>
-        // Theme Persistence Logic
         const toggle = document.getElementById('dark-mode-toggle');
         const body = document.body;
 
-        // Apply theme on load
         if (localStorage.getItem('theme') === 'dark') {
             body.classList.add('dark-mode');
         }
 
-        toggle.addEventListener('click', () => {
-            body.classList.toggle('dark-mode');
-            const theme = body.classList.contains('dark-mode') ? 'dark' : 'light';
-            localStorage.setItem('theme', theme);
-        });
+        if (toggle) {
+            toggle.addEventListener('click', () => {
+                body.classList.toggle('dark-mode');
+                localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
+            });
+        }
     </script>
 </body>
 </html>
