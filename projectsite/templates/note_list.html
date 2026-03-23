@@ -56,12 +56,14 @@
                 {% for item in items %}
                 <tr class="hover-shadow-sm transition-300">
                     <td style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                        <div class="media align-items-center">
-                            <span class="avatar avatar-xs rounded-circle bg-soft-yellow mr-3">
-                                <i class="ni ni-paper-diploma text-yellow" style="font-size: 0.7rem;"></i>
-                            </span>
-                            <span class="mb-0 text-sm text-dark font-weight-600">{{ item.content }}</span>
-                        </div>
+                        <a href="javascript:void(0)" data-toggle="modal" data-target="#noteModal-{{ item.pk }}" class="text-decoration-none">
+                            <div class="media align-items-center">
+                                <span class="avatar avatar-xs rounded-circle bg-soft-yellow mr-3">
+                                    <i class="ni ni-paper-diploma text-yellow" style="font-size: 0.7rem;"></i>
+                                </span>
+                                <span class="mb-0 text-sm font-weight-600 note-text-main">{{ item.content }}</span>
+                            </div>
+                        </a>
                     </td>
                     <td>
                         <span class="badge badge-info badge-pill">{{ item.task.title|default:"No Task" }}</span>
@@ -76,6 +78,41 @@
                         </div>
                     </td>   
                 </tr>
+
+                <div class="modal fade" id="noteModal-{{ item.pk }}" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content border-0 shadow-lg">
+                            <div class="modal-header bg-secondary">
+                                <h5 class="modal-title text-uppercase ls-1">Note Details</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <div class="mb-4">
+                                    <small class="text-muted text-uppercase font-weight-bold d-block mb-2">Note Content</small>
+                                    <p class="text-dark leading-relaxed" style="white-space: pre-wrap;">{{ item.content }}</p>
+                                </div>
+                                <hr class="my-3">
+                                <div class="row text-center">
+                                    <div class="col-6 border-right">
+                                        <small class="text-muted text-uppercase d-block mb-1">Related Task</small>
+                                        <span class="badge badge-pill badge-info">{{ item.task.title|default:"None" }}</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted text-uppercase d-block mb-1">Created Date</small>
+                                        <span class="text-sm font-weight-bold">{{ item.created_at|date:"F d, Y" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer bg-secondary">
+                                <a href="{% url 'note_edit' item.pk %}" class="btn btn-sm btn-primary">Edit Note</a>
+                                <button type="button" class="btn btn-sm btn-link text-muted ml-auto" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {% empty %}
                 <tr>
                     <td colspan="4" class="text-center py-5">
@@ -94,7 +131,17 @@
 <style>
     .transition-300 { transition: all 0.3s ease; }
     .hover-shadow-sm:hover { background-color: rgba(94, 114, 228, 0.03); }
+    
+    /* Ensure note text is visible in both modes */
+    .note-text-main { color: #32325d; }
+    .dark-mode .note-text-main { color: #ffffff !important; }
+    
     .bg-soft-yellow { background-color: #fef9e7; }
     .dark-mode .bg-soft-yellow { background-color: #3d3d2d; }
+    
+    /* Modal Text Fixes for Dark Mode */
+    .dark-mode .modal-content { background-color: #1c1c44 !important; }
+    .dark-mode .modal-header, .dark-mode .modal-footer { background-color: #171738 !important; border: 0; }
+    .dark-mode .modal-body p { color: #eceeef !important; }
 </style>
 {% endblock %}

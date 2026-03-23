@@ -12,19 +12,19 @@
     <link href="{% static 'css/argon-dashboard.css' %}" rel="stylesheet" />
     
     <style>
-        /* --- Robust Dark Mode --- */
+
         body.dark-mode { background-color: #10102b !important; color: #ffffff !important; }
         .dark-mode .navbar-vertical { background-color: #171738 !important; border-color: #2e2e5d !important; }
         .dark-mode .navbar-vertical .nav-link { color: #adb5bd !important; }
         .dark-mode .navbar-vertical .nav-link:hover { color: #ffffff !important; }
         
-        /* Text Contrast Fix for Dark Mode */
-        .dark-mode h1, .dark-mode h2, .dark-mode h3, .dark-mode h4, .dark-mode h5, .dark-mode h6,
+        .dark-mode h1, .dark-mode h2, .dark-mode h3, .dark-mode h5, .dark-mode h6,
         .dark-mode p, .dark-mode span, .dark-mode label, .dark-mode td, .dark-mode th {
             color: #ffffff !important;
         }
+        .dark-mode h4 { color: #2e2f30 !important; }
 
-        /* Card & Table Fixes */
+
         .dark-mode .card, .dark-mode .thead-light th { 
             background-color: #1c1c44 !important; 
             border-color: #2e2e5d !important; 
@@ -32,16 +32,13 @@
         .dark-mode .table td, .dark-mode .table th { border-top: 1px solid #2e2e5d; }
         .dark-mode .text-muted { color: #8898aa !important; }
         
-        /* Dropdown Fixes */
         .dark-mode .dropdown-menu { background-color: #1c1c44 !important; border: 1px solid #2e2e5d; }
         .dark-mode .dropdown-item { color: #adb5bd !important; }
         .dark-mode .dropdown-item:hover { background-color: #2e2e5d !important; color: #ffffff !important; }
         .dark-mode .dropdown-divider { border-top: 1px solid #2e2e5d; }
 
-        /* Avatar */
         .avatar img { width: 36px; height: 36px; object-fit: cover; border-radius: 50%; }
         
-        /* Alert Styling */
         .alert { z-index: 1080; }
     </style>
 </head>
@@ -72,6 +69,11 @@
                 </ul>
                 <hr class="my-3">
                 <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'about' %}">
+                            <i class="ni ni-world text-info"></i> <span>About</span>
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="javascript:void(0)" id="dark-mode-toggle">
                             <i class="ni ni-palette text-darker"></i> <span>Change Theme</span>
