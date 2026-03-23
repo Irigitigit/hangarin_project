@@ -77,11 +77,11 @@
             <tbody class="list">
                 {% for item in items %}
                 <tr class="hover-shadow-sm transition-300">
-                    <td class="font-weight-600 text-dark">
+                    <td class="font-weight-600">
                         <a href="javascript:void(0)" data-toggle="modal" data-target="#taskModal-{{ item.pk }}" class="text-primary" style="text-decoration: none;">
                             <div class="media align-items-center">
                                 <div>
-                                    <span class="mb-0 text-sm d-block font-weight-bold">{{ item.title }}</span>
+                                    <span class="mb-0 text-sm d-block font-weight-bold task-title-cell">{{ item.title }}</span>
                                     <small class="text-muted">{{ item.status }}</small>
                                 </div>
                             </div>
@@ -118,7 +118,7 @@
                 <div class="modal fade" id="taskModal-{{ item.pk }}" tabindex="-1" role="dialog" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered" role="document">
                         <div class="modal-content border-0 shadow-lg">
-                            <div class="modal-header bg-secondary">
+                            <div class="modal-header custom-modal-header">
                                 <h5 class="modal-title text-uppercase ls-1">Task Details</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
@@ -133,7 +133,7 @@
                                 <div class="row mb-3 text-center">
                                     <div class="col-6 border-right">
                                         <small class="text-muted text-uppercase d-block mb-1">Priority</small>
-                                        <span class="font-weight-bold">{{ item.priority }}</span>
+                                        <span class="font-weight-bold modal-info-text">{{ item.priority }}</span>
                                     </div>
                                     <div class="col-6">
                                         <small class="text-muted text-uppercase d-block mb-1">Status</small>
@@ -142,7 +142,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <small class="text-muted text-uppercase font-weight-bold">Description</small>
-                                    <p class="mt-1 text-sm text-dark">{{ item.description|default:"No description provided." }}</p>
+                                    <p class="mt-1 text-sm modal-description">{{ item.description|default:"No description provided." }}</p>
                                 </div>
                                 <div class="mb-3">
                                     <small class="text-muted text-uppercase font-weight-bold">Notes</small>
@@ -150,10 +150,10 @@
                                 </div>
                                 <div class="text-center mt-4">
                                     <small class="text-muted text-uppercase d-block mb-1">Deadline</small>
-                                    <span class="text-sm"><i class="ni ni-calendar-grid-58 mr-1"></i>{{ item.deadline|date:"M d, Y"|default:"No Deadline" }}</span>
+                                    <span class="text-sm modal-info-text"><i class="ni ni-calendar-grid-58 mr-1"></i>{{ item.deadline|date:"M d, Y"|default:"No Deadline" }}</span>
                                 </div>
                             </div>
-                            <div class="modal-footer bg-secondary">
+                            <div class="modal-footer custom-modal-footer">
                                 <a href="{% url 'task_update' item.pk %}" class="btn btn-sm btn-primary">Edit Task</a>
                                 <button type="button" class="btn btn-sm btn-link text-muted ml-auto" data-dismiss="modal">Close</button>
                             </div>
@@ -170,4 +170,41 @@
         </table>
     </div>
 </div>
+
+<style>
+    /* Table Text Fix */
+    .task-title-cell { color: #32325d; }
+    .dark-mode .task-title-cell { color: #ffffff !important; }
+
+    /* Modal Styling for Dark Mode */
+    .dark-mode .modal-content {
+        background-color: #1c1c44 !important;
+        border: 1px solid #2e2e5d !important;
+    }
+
+    .dark-mode .custom-modal-header, 
+    .dark-mode .custom-modal-footer {
+        background-color: #171738 !important;
+        border: 0;
+    }
+
+    .dark-mode .modal-header .close {
+        color: #fff;
+        text-shadow: none;
+        opacity: 0.5;
+    }
+
+    .dark-mode .modal-info-text {
+        color: #ffffff !important;
+    }
+
+    .dark-mode .modal-description {
+        color: #adb5bd !important;
+    }
+
+    /* Standard Header/Footer Colors for Light Mode */
+    .custom-modal-header, .custom-modal-footer {
+        background-color: #f7f8f9;
+    }
+</style>
 {% endblock %}
