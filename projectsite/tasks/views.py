@@ -1,5 +1,3 @@
-from multiprocessing import context
-from urllib import request
 from django.shortcuts import render
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
@@ -9,18 +7,15 @@ from datetime import timedelta
 from django import forms
 from django.db.models import Q
 
+# --- DASHBOARD & ABOUT ---
 def home_view(request):
     now = timezone.now()
     three_days_from_now = now + timedelta(days=3)
 
-    # 1. High Priority Tasks
-    # Assumes your Priority model has a name field like 'High'
-    # TEMPORARY TEST: Change the filter to this to see if ANY tasks show up
     active_critical_tasks = Task.objects.filter(
         (Q(priority__name__icontains='High') | Q(priority__name__icontains='Crit'))
     ).exclude(status__iexact='Completed').select_related('priority', 'category').order_by('-id')
 
-    # 2. Tasks Due Soon (Next 3 days)   
     urgent_tasks = Task.objects.filter(
         deadline__range=[now, three_days_from_now]
     ).order_by('deadline')
@@ -32,7 +27,6 @@ def home_view(request):
         'my_tasks': active_critical_tasks,
         'urgent_tasks': urgent_tasks,
     }
-
     return render(request, 'home.html', context)
 
 def about_view(request):
@@ -46,40 +40,22 @@ class TaskListView(ListView):
     template_name = 'task_list.html'
 
     def get_queryset(self):
-        # 1. Start with the base queryset
         queryset = Task.objects.all().select_related('priority', 'category')
-        
-        # 2. Grab filters from the request
         query = self.request.GET.get('q')
         priority_filter = self.request.GET.get('priority')
         category_filter = self.request.GET.get('category')
         status_filter = self.request.GET.get('status')
 
-        # 3. Apply filters if they exist
         if query:
-            queryset = queryset.filter(
-                Q(title__icontains=query) | Q(description__icontains=query)
-            )
-        
+            queryset = queryset.filter(Q(title__icontains=query) | Q(description__icontains=query))
         if category_filter:
             queryset = queryset.filter(category__name__iexact=category_filter)
         if priority_filter:
             queryset = queryset.filter(priority__name__iexact=priority_filter)
-            
         if status_filter:
             queryset = queryset.filter(status__iexact=status_filter)
 
-        # 4. Return the QuerySet (Django handles the rendering automatically)
         return queryset.order_by('-id')
-
-    def get_context_data(self, **kwargs):
-        # This keeps your search/filter values "sticky" in the search bars/dropdowns
-        context = super().get_context_data(**kwargs)
-        context['query'] = self.request.GET.get('q', '')
-        context['selected_priority'] = self.request.GET.get('priority', '')
-        context['selected_status'] = self.request.GET.get('status', '')
-        return context
-
 
 class TaskCreateView(CreateView):
     model = Task
@@ -89,16 +65,11 @@ class TaskCreateView(CreateView):
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        # We change the 'deadline' widget to use the HTML5 datetime-local picker
         form.fields['deadline'].widget = forms.DateTimeInput(
             attrs={'type': 'datetime-local', 'class': 'form-control'},
             format='%Y-%m-%dT%H:%M'
         )
         return form
-
-    def form_invalid(self, form):
-        print("Form Errors:", form.errors) # This helps you debug in the terminal
-        return super().form_invalid(form)
 
 class TaskUpdateView(UpdateView):
     model = Task
@@ -112,12 +83,18 @@ class TaskDeleteView(DeleteView):
     success_url = reverse_lazy('task_list')
 
 
-
-# --- CATEGORY ---
+# --- CATEGORY CRUD ---
 class CategoryListView(ListView):
     model = Category
     template_name = 'category_list.html'
     context_object_name = 'items'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        query = self.request.GET.get('q')
+        if query:
+            queryset = queryset.filter(name__icontains=query)
+        return queryset.order_by('name')
 
 class CategoryCreateView(CreateView):
     model = Category
@@ -136,7 +113,8 @@ class CategoryDeleteView(DeleteView):
     template_name = 'common_confirm_delete.html'
     success_url = reverse_lazy('category_list')
 
-# --- PRIORITY ---
+
+# --- PRIORITY CRUD ---
 class PriorityListView(ListView):
     model = Priority
     template_name = 'priority_list.html'
@@ -159,48 +137,75 @@ class PriorityDeleteView(DeleteView):
     template_name = 'common_confirm_delete.html'
     success_url = reverse_lazy('priority_list')
 
+
+# --- NOTE CRUD ---
 class NoteListView(ListView):
     model = Note
     template_name = 'note_list.html'
     context_object_name = 'items'
 
+    def get_queryset(self):
+        queryset = super().get_queryset().select_related('task')
+        query = self.request.GET.get('q')
+        date_filter = self.request.GET.get('date')
+
+        if query:
+            queryset = queryset.filter(content__icontains=query)
+        if date_filter:
+            queryset = queryset.filter(created_at__date=date_filter)
+
+        return queryset.order_by('-created_at')
+
 class NoteCreateView(CreateView):
     model = Note
     fields = ['content', 'task']
     template_name = 'common_form.html'
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('note_list') 
 
 class NoteUpdateView(UpdateView):
     model = Note
     fields = ['content', 'task']
     template_name = 'common_form.html'
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('note_list')
 
 class NoteDeleteView(DeleteView):
     model = Note
     template_name = 'common_confirm_delete.html'
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('note_list')
 
+
+# --- SUBTASK CRUD ---
 class SubTaskListView(ListView):    
     model = SubTask
     template_name = 'subtask_list.html'
     context_object_name = 'items'
 
+    def get_queryset(self):
+        # Added select_related for better performance
+        queryset = super().get_queryset().select_related('parent_task')
+        query = self.request.GET.get('q')
+        status_filter = self.request.GET.get('status')
+        
+        if query:
+            queryset = queryset.filter(title__icontains=query)
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+
+        return queryset
+
 class SubTaskCreateView(CreateView):
     model = SubTask
     fields = ['title', 'status', 'parent_task']
     template_name = 'common_form.html'
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('subtask_list')
 
 class SubTaskUpdateView(UpdateView):
     model = SubTask
     fields = ['title', 'status', 'parent_task']
     template_name = 'common_form.html'
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('subtask_list')
 
 class SubTaskDeleteView(DeleteView):
     model = SubTask
     template_name = 'common_confirm_delete.html'
-    success_url = reverse_lazy('home')
-
-# (Repeat similar classes for Note and SubTask as needed)
+    success_url = reverse_lazy('subtask_list')

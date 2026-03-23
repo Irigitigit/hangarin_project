@@ -15,43 +15,73 @@
         </div>
     </div>
 
+    <div class="px-4 pb-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group input-group-alternative shadow-sm">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    </div>
+                    <input type="text" name="q" class="form-control" placeholder="Search note content..." value="{{ request.GET.q }}">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary px-3" type="submit">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="input-group input-group-alternative shadow-sm">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                    </div>
+                    <input type="date" name="date" class="form-control" value="{{ request.GET.date }}" onchange="this.form.submit()">
+                </div>
+            </div>
+        </form>
+    </div>
+
     <div class="table-responsive">
         <table class="table align-items-center table-flush">
             <thead class="thead-light">
                 <tr>
-                    <th scope="col">Note Title</th>
+                    <th scope="col">Content</th>
+                    <th scope="col">Linked Task</th>
+                    <th scope="col">Created At</th>
                     <th scope="col" class="text-right">Actions</th>
                 </tr>
             </thead>
             <tbody class="list">
                 {% for item in items %}
                 <tr class="hover-shadow-sm transition-300">
-                    <td class="font-weight-600 text-dark">
+                    <td style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                         <div class="media align-items-center">
                             <span class="avatar avatar-xs rounded-circle bg-soft-yellow mr-3">
                                 <i class="ni ni-paper-diploma text-yellow" style="font-size: 0.7rem;"></i>
                             </span>
-                            <span class="mb-0 text-sm">{{ item.content }}</span>
+                            <span class="mb-0 text-sm text-dark font-weight-600">{{ item.content }}</span>
                         </div>
+                    </td>
+                    <td>
+                        <span class="badge badge-info badge-pill">{{ item.task.title|default:"No Task" }}</span>
+                    </td>
+                    <td>
+                        <small class="text-muted"><i class="fas fa-clock mr-1"></i>{{ item.created_at|date:"M d, Y" }}</small>
                     </td>
                     <td class="text-right">
                         <div class="btn-group">
-                            <a href="{% url 'note_edit' item.pk %}" class="btn btn-sm btn-outline-primary" title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <a href="{% url 'note_delete' item.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
-                                <i class="fas fa-trash"></i>
-                            </a>
+                            <a href="{% url 'note_edit' item.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                            <a href="{% url 'note_delete' item.pk %}" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>
                         </div>
                     </td>   
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="2" class="text-center py-6 bg-secondary-soft">
+                    <td colspan="4" class="text-center py-5">
                         <div class="empty-state">
                             <i class="ni ni-collection text-muted mb-3" style="font-size: 3rem; display: block;"></i>
                             <h4 class="text-muted font-weight-light">Your notepad is empty.</h4>
-                            <a href="{% url 'note_add' %}" class="btn btn-link text-primary mt-2">Write your first note</a>
                         </div>
                     </td>
                 </tr>
@@ -62,16 +92,9 @@
 </div>
 
 <style>
-    /* Consistency & Smoothness */
     .transition-300 { transition: all 0.3s ease; }
-    .hover-shadow-sm:hover { 
-        background-color: rgba(94, 114, 228, 0.03); 
-    }
+    .hover-shadow-sm:hover { background-color: rgba(94, 114, 228, 0.03); }
     .bg-soft-yellow { background-color: #fef9e7; }
-    
-    /* Dark Mode overrides for the Note view */
     .dark-mode .bg-soft-yellow { background-color: #3d3d2d; }
-    .dark-mode .text-dark { color: #ffffff !important; }
-    .dark-mode .bg-secondary-soft { background-color: #1a174d; }
 </style>
 {% endblock %}

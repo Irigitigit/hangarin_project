@@ -59,18 +59,24 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if 'task' in request.path %}active{% endif %}" href="{% url 'task_list' %}">
+                        <a class="nav-link {% if 'task' in request.path and 'subtask' not in request.path %}active{% endif %}" href="{% url 'task_list' %}">
                             <i class="ni ni-check-bold text-green"></i> Tasks
                         </a>
                     </li>
+
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'about' %}">
-                            <i class="ni ni-collection text-info"></i> About
+                        <a class="nav-link {% if 'subtask' in request.path %}active{% endif %}" href="{% url 'subtask_list' %}">
+                            <i class="ni ni-bullet-list-67 text-info"></i> Subtasks
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if 'note' in request.path %}active{% endif %}" href="{% url 'note_list' %}">
                             <i class="ni ni-paper-diploma text-yellow"></i> Notes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'about' %}">
+                            <i class="ni ni-collection text-info"></i> About
                         </a>
                     </li>
                 </ul>

@@ -15,11 +15,42 @@
         </div>
     </div>
 
+    <div class="px-4 pb-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-4">
+                <div class="input-group input-group-alternative shadow-sm">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    </div>
+                    <input type="text" name="q" class="form-control" placeholder="Search subtasks..." value="{{ request.GET.q }}">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <select name="status" class="form-control form-control-alternative shadow-sm" onchange="this.form.submit()">
+                    <option value="">All Statuses</option>
+                    <option value="Pending" {% if request.GET.status == "Pending" %}selected{% endif %}>Pending</option>
+                    <option value="In Progress" {% if request.GET.status == "In Progress" %}selected{% endif %}>In Progress</option>
+                    <option value="Completed" {% if request.GET.status == "Completed" %}selected{% endif %}>Completed</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <select name="parent" class="form-control form-control-alternative shadow-sm" onchange="this.form.submit()">
+                    <option value="">All Parent Tasks</option>
+                    {% for task in parent_tasks %}
+                        <option value="{{ task.id }}" {% if request.GET.parent == task.id|stringformat:"i" %}selected{% endif %}>{{ task.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
+
     <div class="table-responsive">
         <table class="table align-items-center table-flush">
             <thead class="thead-light">
                 <tr>
-                    <th scope="col" class="sort" data-sort="name">Subtask Name</th>
+                    <th scope="col">Subtask Name</th>
+                    <th scope="col">Parent Task</th>
+                    <th scope="col">Status</th>
                     <th scope="col" class="text-right">Actions</th>
                 </tr>
             </thead>
@@ -27,51 +58,80 @@
                 {% for item in items %}
                 <tr class="hover-shadow-sm transition-300">
                     <td class="font-weight-600 text-dark">
-                        <div class="media align-items-center">
-                            <span class="avatar avatar-xs rounded-circle bg-soft-primary mr-3">
-                                <i class="ni ni-check-bold text-primary" style="font-size: 0.7rem;"></i>
-                            </span>
-                            <span class="mb-0 text-sm">{{ item.name }}</span>
-                        </div>
+                        <a href="javascript:void(0)" data-toggle="modal" data-target="#subtaskModal-{{ item.pk }}" class="text-primary" style="text-decoration: none;">
+                            <div class="media align-items-center">
+                                <span class="mb-0 text-sm font-weight-bold">{{ item.title }}</span>
+                            </div>
+                        </a>
+                    </td>
+                    <td>
+                        <span class="badge badge-info badge-pill shadow-none">{{ item.parent_task.title }}</span>
+                    </td>
+                    <td>
+                        {% if item.status == 'Completed' %}
+                            <span class="badge badge-dot mr-4"><i class="bg-success"></i> Completed</span>
+                        {% elif item.status == 'In Progress' %}
+                            <span class="badge badge-dot mr-4"><i class="bg-info"></i> In Progress</span>
+                        {% else %}
+                            <span class="badge badge-dot mr-4"><i class="bg-warning"></i> Pending</span>
+                        {% endif %}
                     </td>
                     <td class="text-right">
                         <div class="btn-group">
-                            <a href="{% url 'subtask_edit' item.pk %}" class="btn btn-sm btn-outline-primary" title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <a href="{% url 'subtask_delete' item.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
-                                <i class="fas fa-trash"></i>
-                            </a>
+                            <a href="{% url 'subtask_edit' item.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                            <a href="{% url 'subtask_delete' item.pk %}" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>
                         </div>
                     </td>   
                 </tr>
+
+                <div class="modal fade" id="subtaskModal-{{ item.pk }}" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content border-0 shadow-lg">
+                            <div class="modal-header bg-secondary">
+                                <h5 class="modal-title text-uppercase ls-1">Subtask Details</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <div class="mb-4 text-center">
+                                    <h2 class="display-4 mb-1 text-primary">{{ item.title }}</h2>
+                                    <small class="text-muted">Part of: </small>
+                                    <span class="badge badge-pill badge-info">{{ item.parent_task.title }}</span>
+                                </div>
+                                <hr class="my-3">
+                                <div class="row mb-3 text-center">
+                                    <div class="col-12">
+                                        <small class="text-muted text-uppercase d-block mb-1">Current Status</small>
+                                        <span class="badge badge-pill {% if item.status == 'Completed' %}badge-success{% else %}badge-warning{% endif %}">
+                                            {{ item.status }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-muted text-uppercase font-weight-bold">Notes / Description</small>
+                                    <p class="mt-1 text-sm text-dark">{{ item.description|default:"No details provided for this subtask." }}</p>
+                                </div>
+                                <div class="text-center mt-4">
+                                    <small class="text-muted text-uppercase d-block mb-1">Created on</small>
+                                    <span class="text-sm"><i class="ni ni-calendar-grid-58 mr-1"></i> {{ item.created_at|date:"M d, Y" }}</span>
+                                </div>
+                            </div>
+                            <div class="modal-footer bg-secondary">
+                                <a href="{% url 'subtask_edit' item.pk %}" class="btn btn-sm btn-primary">Edit Subtask</a>
+                                <button type="button" class="btn btn-sm btn-link text-muted ml-auto" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {% empty %}
                 <tr>
-                    <td colspan="2" class="text-center py-6 bg-secondary-soft">
-                        <div class="empty-state">
-                            <i class="ni ni-folder-17 text-muted mb-3" style="font-size: 3rem; display: block;"></i>
-                            <h4 class="text-muted font-weight-light">No subtasks found yet.</h4>
-                            <a href="{% url 'subtask_add' %}" class="btn btn-link text-primary mt-2">Create your first subtask</a>
-                        </div>
-                    </td>
+                    <td colspan="4" class="text-center py-5">No subtasks found.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
-
-<style>
-    /* Smoothness enhancements */
-    .transition-300 { transition: all 0.3s ease; }
-    .hover-shadow-sm:hover { 
-        background-color: rgba(94, 114, 228, 0.03); 
-    }
-    .bg-soft-primary { background-color: #e8ebfa; }
-    
-    /* Dark mode adjustments for this specific table */
-    .dark-mode .bg-soft-primary { background-color: #32325d; }
-    .dark-mode .text-dark { color: #ffffff !important; }
-    .dark-mode .bg-secondary-soft { background-color: #1a174d; }
-</style>
 {% endblock %}
