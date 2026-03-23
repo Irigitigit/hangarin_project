@@ -1,0 +1,171 @@
+{% load socialaccount %} {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Hangarin | Login</title>
+    
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
+    <link href="{% static 'js/plugins/nucleo/css/nucleo.css' %}" rel="stylesheet" />
+    <link href="{% static 'js/plugins/@fortawesome/fontawesome-free/css/all.min.css' %}" rel="stylesheet" />
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.2/mdb.min.css" />
+    <link href="{% static 'css/argon-dashboard.css' %}" rel="stylesheet" />
+
+    <style>
+        :root { --transition-speed: 0.3s; }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important;
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        /* --- Dark Mode Support --- */
+        body.dark-mode { background: #10102b !important; }
+        .dark-mode .auth-card { background: #171738; border: 1px solid #2e2e5d; color: #e9ecef; }
+        .dark-mode .form-label, .dark-mode .text-center, .dark-mode p { color: #adb5bd !important; }
+        .dark-mode .nav-pills .nav-link:not(.active) { color: #adb5bd !important; }
+        .dark-mode .form-control { background-color: #1c1c44; border-color: #2e2e5d; color: white; }
+
+        .auth-card {
+            max-width: 450px;
+            width: 90%;
+            background: #fff;
+            border-radius: 1rem;
+            box-shadow: 0 15px 35px rgba(50, 50, 93, .1), 0 5px 15px rgba(0, 0, 0, .07);
+            padding: 2.5rem;
+            transition: all var(--transition-speed);
+        }
+
+        .nav-pills .nav-link.active {
+            background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important;
+            box-shadow: 0 4px 6px rgba(50, 50, 93, .11), 0 1px 3px rgba(0, 0, 0, .08);
+        }
+
+        .btn-primary {
+            background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important;
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .brand-logo {
+            letter-spacing: 2px;
+            font-weight: 800;
+            color: #5e72e4;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="auth-card">
+        <div class="brand-logo">
+            <h2 class="text-primary">HANGARIN</h2>
+        </div>
+
+        <ul class="nav nav-pills nav-justified mb-4" id="ex1" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active" id="tab-login" data-mdb-pill-init href="#pills-login" role="tab">Login</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="tab-register" data-mdb-pill-init href="#pills-register" role="tab">Register</a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="pills-login" role="tabpanel">
+                <form method="post" action="{% url 'account_login' %}">
+                    {% csrf_token %}
+                    <div class="text-center mb-3">
+                        <p class="text-sm">Sign in with:</p>
+                        <a href="{% provider_login_url 'google' %}" class="btn btn-outline-primary btn-floating mx-1">
+                            <i class="fab fa-google"></i>
+                        </a>
+                        <a href="#" class="btn btn-outline-primary btn-floating mx-1">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                    
+                    <div class="separator text-center my-3">
+                        <small class="text-muted">OR</small>
+                    </div>
+
+                    <div data-mdb-input-init class="form-outline mb-4">
+                        <input type="text" name="login" id="id_login" class="form-control" required />
+                        <label class="form-label" for="id_login">Email or Username</label>
+                    </div>
+
+                    <div data-mdb-input-init class="form-outline mb-4">
+                        <input type="password" name="password" id="id_password" class="form-control" required />
+                        <label class="form-label" for="id_password">Password</label>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="loginCheck" checked>
+                                <label class="custom-control-label text-sm" for="loginCheck">Remember me</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-right">
+                            <a href="{% url 'account_reset_password' %}" class="text-sm">Forgot?</a>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block shadow">Sign in</button>
+                </form>
+            </div>
+
+            <div class="tab-pane fade" id="pills-register" role="tabpanel">
+                <form method="post" action="{% url 'account_signup' %}">
+                    {% csrf_token %}
+                    <div class="text-center mb-3">
+                        <p class="text-sm">Quick register with:</p>
+                        <a href="{% provider_login_url 'google' %}" class="btn btn-outline-primary btn-floating mx-1">
+                            <i class="fab fa-google"></i>
+                        </a>
+                    </div>
+
+                    <div data-mdb-input-init class="form-outline mb-4">
+                        <input type="text" name="username" id="registerUsername" class="form-control" required />
+                        <label class="form-label" for="registerUsername">Username</label>
+                    </div>
+
+                    <div data-mdb-input-init class="form-outline mb-4">
+                        <input type="email" name="email" id="registerEmail" class="form-control" required />
+                        <label class="form-label" for="registerEmail">Email</label>
+                    </div>
+
+                    <div data-mdb-input-init class="form-outline mb-4">
+                        <input type="password" name="password1" id="registerPassword" class="form-control" required />
+                        <label class="form-label" for="registerPassword">Password</label>
+                    </div>
+
+                    <div data-mdb-input-init class="form-outline mb-4">
+                        <input type="password" name="password2" id="registerRepeatPassword" class="form-control" required />
+                        <label class="form-label" for="registerRepeatPassword">Confirm Password</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block shadow">Create Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.2/mdb.min.js"></script>
+    <script>
+        // Check local storage for dark mode preference
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+</body>
+</html>
