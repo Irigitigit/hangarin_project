@@ -1,8 +1,10 @@
 {% load static %}
+{% load pwa %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
+    {% progressive_web_app_meta %}
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Hangarin Dashboard</title>
     
@@ -41,6 +43,7 @@
         
         .alert { z-index: 1080; }
     </style>
+
 </head>
 
 <body class="{% if not user.is_authenticated %}bg-gradient-primary{% endif %}">
