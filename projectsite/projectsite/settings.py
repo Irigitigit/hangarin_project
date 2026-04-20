@@ -141,32 +141,30 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-LOGIN_URL = '/accounts/login/' # where @login_required will send users
-LOGIN_REDIRECT_URL = '/' # where to go after successful login
-LOGOUT_REDIRECT_URL = '/accounts/login/' # after logout, go back to login
-ACCOUNT_LOGOUT_REDIRECT_URL = '/accounts/login/' # where to redirect after logout
-ACCOUNT_LOGOUT_ON_GET = True # logout immediately on GET
-ACCOUNT_LOGIN_METHODS = {"username", "email"} # allow login with username OR email
+
+LOGIN_URL = '/accounts/login/'
+LOGIN_REDIRECT_URL = '/'
+ACCOUNT_LOGOUT_REDIRECT_URL = '/accounts/login/'
+
+ACCOUNT_LOGIN_METHODS = {"username", "email"}
 ACCOUNT_SIGNUP_FIELDS = [
     "username*",
     "email*",
     "password1*",
     "password2*",
 ]
-
-LOGIN_REQUIRED_IGNORE_PATHS = [
-    r'/accounts/logout/.*',
-    r'/accounts/signup/.*',
-    r'/admin/.*',
-]
-
-ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
-ACCOUNT_EMAIL_REQUIRED = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http' if DEBUG else 'https'
 
-PWA_APP_NAME = 'ProjectSite'
-PWA_APP_DESCRIPTION = "A Progressive Web App version of ProjectSite"
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    'https://mikopatindol.pythonanywhere.com',
+]
+
+PWA_APP_NAME = 'Hangarin'
+PWA_APP_DESCRIPTION = "A Progressive Web App version of Hangarin"
 PWA_APP_THEME_COLOR = '#0A0A0A'
 PWA_APP_BACKGROUND_COLOR = '#FFFFFF'
 PWA_APP_DISPLAY = 'standalone'
@@ -175,25 +173,24 @@ PWA_APP_ORIENTATION = 'portrait'
 PWA_APP_START_URL = '/'
 PWA_APP_STATUS_BAR_COLOR = 'default'
 PWA_APP_ICONS = [
-{
-'src': '/static/img/icons/icon-001.png',
-'sizes': '192x192'
-},
-{
-'src': '/static/img/icons/icon-002.png',
-'sizes': '512x512'
-}
-
+    {
+        'src': '/static/img/icons/icon-001.png',
+        'sizes': '192x192'
+    },
+    {
+        'src': '/static/img/icons/icon-002.png',
+        'sizes': '512x512'
+    }
 ]
 PWA_APP_ICONS_APPLE = [
-{
-'src': '/static/img/icons/icon-001.png',
-'sizes': '192x192'
-},
-{
-'src': '/static/img/icons/icon-002.png',
-'sizes': '512x512'
-}
+    {
+        'src': '/static/img/icons/icon-001.png',
+        'sizes': '192x192'
+    },
+    {
+        'src': '/static/img/icons/icon-002.png',
+        'sizes': '512x512'
+    }
 ]
 PWA_APP_DIR = 'ltr'
 PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'static/js', 'serviceworker.js')

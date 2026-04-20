@@ -7,7 +7,6 @@ self.addEventListener('install', function(e) {
 });
 
 self.addEventListener('fetch', function(e) {
-    // Skip non-GET requests and Chrome extension requests
     if (e.request.method !== 'GET') return;
     if (!e.request.url.startsWith('http')) return;
 
@@ -16,7 +15,6 @@ self.addEventListener('fetch', function(e) {
             if (response) return response;
 
             return fetch(e.request).catch(function() {
-                // Silently fail — don't break the page
                 return new Response('', { status: 503 });
             });
         })
