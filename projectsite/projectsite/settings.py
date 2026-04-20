@@ -175,22 +175,29 @@ PWA_APP_STATUS_BAR_COLOR = 'default'
 PWA_APP_ICONS = [
     {
         'src': '/static/img/icons/icon-001.png',
-        'sizes': '192x192'
+        'sizes': '192x192',
+        'type': 'image/png',
+        'purpose': 'any maskable'
     },
     {
         'src': '/static/img/icons/icon-002.png',
-        'sizes': '512x512'
+        'sizes': '512x512',
+        'type': 'image/png',
+        'purpose': 'any maskable'
     }
 ]
 PWA_APP_ICONS_APPLE = [
     {
         'src': '/static/img/icons/icon-001.png',
-        'sizes': '192x192'
+        'sizes': '192x192',
+        'type': 'image/png'
     },
     {
         'src': '/static/img/icons/icon-002.png',
-        'sizes': '512x512'
+        'sizes': '512x512',
+        'type': 'image/png'
     }
 ]
 PWA_APP_DIR = 'ltr'
+PWA_APP_LANG = 'en-US'
 PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'static/js', 'serviceworker.js')
