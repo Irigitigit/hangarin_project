@@ -8,6 +8,19 @@ from django import forms
 from django.db.models import Q
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import EmptyPage, PageNotAnInteger
+
+
+class SafePaginationMixin:
+    def paginate_queryset(self, queryset, page_size):
+        paginator = self.get_paginator(queryset, page_size)
+        page = self.request.GET.get(self.page_kwarg, 1)
+        try:
+            page_number = paginator.validate_number(page)
+        except (EmptyPage, PageNotAnInteger):
+            page_number = paginator.num_pages if str(page).strip() not in ('', '1') else 1
+        p = paginator.page(page_number)
+        return paginator, p, p.object_list, p.has_other_pages()
 
 # --- DASHBOARD & ABOUT ---
 @login_required
@@ -21,7 +34,7 @@ def home_view(request):
 
     urgent_tasks = Task.objects.filter(
         deadline__range=[now, three_days_from_now]
-    ).order_by('deadline')
+    ).select_related('priority', 'category').order_by('deadline')
 
     context = {
         'total_tasks': Task.objects.count(),
@@ -37,10 +50,11 @@ def about_view(request):
 
 
 # --- TASK CRUD ---
-class TaskListView(LoginRequiredMixin, ListView):
+class TaskListView(SafePaginationMixin, LoginRequiredMixin, ListView):
     model = Task
     context_object_name = 'items'
     template_name = 'task_list.html'
+    paginate_by = 5
 
     def get_queryset(self):
         queryset = Task.objects.all().select_related('priority', 'category')
@@ -59,6 +73,12 @@ class TaskListView(LoginRequiredMixin, ListView):
             queryset = queryset.filter(status__iexact=status_filter)
 
         return queryset.order_by('-id')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.order_by('name')
+        context['priorities'] = Priority.objects.order_by('name')
+        return context
 
 class TaskCreateView(LoginRequiredMixin, CreateView):
     model = Task
@@ -79,6 +99,14 @@ class TaskUpdateView(LoginRequiredMixin, UpdateView):
     fields = ['title', 'description', 'deadline', 'status', 'category', 'priority']
     template_name = 'common_form.html'
     success_url = reverse_lazy('task_list')
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields['deadline'].widget = forms.DateTimeInput(
+            attrs={'type': 'datetime-local', 'class': 'form-control'},
+            format='%Y-%m-%dT%H:%M'
+        )
+        return form
 
 class TaskDeleteView(LoginRequiredMixin, DeleteView):
     model = Task
@@ -142,10 +170,11 @@ class PriorityDeleteView(LoginRequiredMixin, DeleteView):
 
 
 # --- NOTE CRUD ---
-class NoteListView(LoginRequiredMixin,ListView):
+class NoteListView(SafePaginationMixin, LoginRequiredMixin, ListView):
     model = Note
     template_name = 'note_list.html'
     context_object_name = 'items'
+    paginate_by = 5
 
     def get_queryset(self):
         queryset = super().get_queryset().select_related('task')
@@ -178,23 +207,31 @@ class NoteDeleteView(LoginRequiredMixin, DeleteView):
 
 
 # --- SUBTASK CRUD ---
-class SubTaskListView(LoginRequiredMixin, ListView):    
+class SubTaskListView(SafePaginationMixin, LoginRequiredMixin, ListView):
     model = SubTask
     template_name = 'subtask_list.html'
     context_object_name = 'items'
+    paginate_by = 5
 
     def get_queryset(self):
-        # Added select_related for better performance
         queryset = super().get_queryset().select_related('parent_task')
         query = self.request.GET.get('q')
         status_filter = self.request.GET.get('status')
-        
+        parent_filter = self.request.GET.get('parent')
+
         if query:
             queryset = queryset.filter(title__icontains=query)
         if status_filter:
             queryset = queryset.filter(status=status_filter)
+        if parent_filter:
+            queryset = queryset.filter(parent_task_id=parent_filter)
 
-        return queryset
+        return queryset.order_by('-id')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['parent_tasks'] = Task.objects.order_by('title')
+        return context
 
 class SubTaskCreateView(LoginRequiredMixin, CreateView):
     model = SubTask

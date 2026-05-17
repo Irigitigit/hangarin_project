@@ -1,28 +1,29 @@
 {% if page_obj.has_other_pages %}
-  <nav aria-label="Page navigation">
-    <ul class="pagination
-        {% if page_obj.has_previous %} pagination-sm {% else %} disabled {% endif %}">
-        <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
-            <span aria-hidden="true">&laquo;</span>
+<nav aria-label="Page navigation" class="mt-3">
+    <ul class="pagination justify-content-center">
+        <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+            {% if page_obj.has_previous %}
+                <a class="page-link" href="{{ request.path }}?{% for key, val in request.GET.items %}{% if key != 'page' %}{{ key }}={{ val }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}" aria-label="Previous">
+            {% else %}
+                <a class="page-link" tabindex="-1" aria-disabled="true" aria-label="Previous">
+            {% endif %}
+                <span aria-hidden="true">&laquo;</span>
             </a>
         </li>
         {% for num in page_obj.paginator.page_range %}
-            {% if page_obj.number == num %}
-                <li class="page-item active"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
-            {% else %}
-                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
-            {% endif %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="{{ request.path }}?{% for key, val in request.GET.items %}{% if key != 'page' %}{{ key }}={{ val }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+            </li>
         {% endfor %}
-        <li class="page-item
-            {% if page_obj.has_next %} pagination-sm {% else %} disabled {% endif %}">
-            <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
-            <span aria-hidden="true">&raquo;</span>
+        <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+            {% if page_obj.has_next %}
+                <a class="page-link" href="{{ request.path }}?{% for key, val in request.GET.items %}{% if key != 'page' %}{{ key }}={{ val }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}" aria-label="Next">
+            {% else %}
+                <a class="page-link" tabindex="-1" aria-disabled="true" aria-label="Next">
+            {% endif %}
+                <span aria-hidden="true">&raquo;</span>
             </a>
         </li>
     </ul>
-    </nav>
-{% endif %} 
-
-
-
+</nav>
+{% endif %}

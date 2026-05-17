@@ -43,21 +43,18 @@
             <div class="col-md-3">
                 <select name="category" class="form-control form-control-alternative shadow-sm" onchange="this.form.submit()">
                     <option value="">All Categories</option>
-                    <option value="Work" {% if request.GET.category == "Work" %}selected{% endif %}>Work</option>
-                    <option value="School" {% if request.GET.category == "School" %}selected{% endif %}>School</option>
-                    <option value="Personal" {% if request.GET.category == "Personal" %}selected{% endif %}>Personal</option>
-                    <option value="Projects" {% if request.GET.category == "Projects" %}selected{% endif %}>Projects</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.name }}" {% if request.GET.category == cat.name %}selected{% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
                 </select>
             </div>
 
             <div class="col-md-3">
                 <select name="priority" class="form-control form-control-alternative shadow-sm" onchange="this.form.submit()">
                     <option value="">All Priorities</option>
-                    <option value="Critical" {% if request.GET.priority == "Critical" %}selected{% endif %}>Critical</option>
-                    <option value="High" {% if request.GET.priority == "High" %}selected{% endif %}>High</option>
-                    <option value="Medium" {% if request.GET.priority == "Medium" %}selected{% endif %}>Medium</option>
-                    <option value="Low" {% if request.GET.priority == "Low" %}selected{% endif %}>Low</option>
-                    <option value="Optional" {% if request.GET.priority == "Optional" %}selected{% endif %}>Optional</option>
+                    {% for pri in priorities %}
+                    <option value="{{ pri.name }}" {% if request.GET.priority == pri.name %}selected{% endif %}>{{ pri.name }}</option>
+                    {% endfor %}
                 </select>
             </div>
         </form>
@@ -169,6 +166,7 @@
             </tbody>
         </table>
     </div>
+    {% include 'includes/pagination.html' %}
 </div>
 
 <style>
