@@ -2,6 +2,30 @@
 
 {% block content %}
 <div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm px-4 py-3" id="weather-widget">
+            <div class="d-flex align-items-center flex-wrap" style="gap: 1rem;">
+                <div id="weather-icon-wrap">
+                    <div class="spinner-border spinner-border-sm text-muted" role="status"></div>
+                </div>
+                <div id="weather-info" class="flex-grow-1">
+                    <span class="text-muted small">Loading weather...</span>
+                </div>
+                <form id="weather-city-form" class="d-flex align-items-center" style="gap: 0.5rem;" onsubmit="fetchWeather(event)">
+                    <div class="input-group input-group-sm" style="width: 200px;">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                        </div>
+                        <input type="text" id="weather-city-input" class="form-control form-control-sm" placeholder="City..." autocomplete="off">
+                    </div>
+                    <button class="btn btn-sm btn-primary" type="submit"><i class="fas fa-search"></i></button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
     <div class="col-xl-4 col-md-6">
         <div class="card card-stats shadow-sm border-0 transition-300">
             <div class="card-body">
@@ -150,5 +174,60 @@
     .border-left-danger { border-left: 4px solid #f5365c !important; }
     .dark-mode .card-stats { background-color: #262161 !important; }
     .dark-mode .text-dark { color: #ffffff !important; }
+
+    #weather-widget { border-left: 4px solid #5e72e4 !important; }
+    .dark-mode #weather-widget { background-color: #262161 !important; }
+    .weather-temp { font-size: 1.8rem; font-weight: 700; line-height: 1; }
+    .weather-desc { font-size: 0.85rem; color: #8898aa; }
+    .dark-mode .weather-desc { color: #adb5bd; }
+    .weather-meta { font-size: 0.8rem; color: #8898aa; }
+    .dark-mode .weather-meta { color: #adb5bd; }
+    .weather-city { font-weight: 600; font-size: 1rem; }
 </style>
+
+<script>
+(function () {
+    function fetchWeather(e) {
+        if (e) e.preventDefault();
+        var cityInput = document.getElementById('weather-city-input');
+        var city = cityInput ? cityInput.value.trim() : '';
+        var url = '/weather/' + (city ? '?city=' + encodeURIComponent(city) : '');
+
+        var iconWrap = document.getElementById('weather-icon-wrap');
+        var infoEl = document.getElementById('weather-info');
+        iconWrap.innerHTML = '<div class="spinner-border spinner-border-sm text-muted" role="status"></div>';
+        infoEl.innerHTML = '<span class="text-muted small">Loading...</span>';
+
+        fetch(url, { credentials: 'same-origin' })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                if (d.error) {
+                    iconWrap.innerHTML = '<i class="fas fa-exclamation-circle text-danger fa-2x"></i>';
+                    infoEl.innerHTML = '<span class="text-danger small">' + d.error + '</span>';
+                    return;
+                }
+                if (cityInput) cityInput.value = '';
+                iconWrap.innerHTML = '<img src="https://openweathermap.org/img/wn/' + d.icon + '@2x.png" width="56" height="56" alt="">';
+                infoEl.innerHTML =
+                    '<span class="weather-city">' + d.city + ', ' + d.country + '</span>' +
+                    '<span class="weather-temp ml-3">' + d.temp + '°C</span>' +
+                    '<span class="weather-desc ml-2">' + d.description + '</span>' +
+                    '<div class="weather-meta mt-1">' +
+                    '<i class="fas fa-thermometer-half mr-1"></i>Feels like ' + d.feels_like + '°C &nbsp;' +
+                    '<i class="fas fa-tint mr-1"></i>' + d.humidity + '% &nbsp;' +
+                    '<i class="fas fa-wind mr-1"></i>' + d.wind + ' m/s' +
+                    '</div>';
+            })
+            .catch(function () {
+                iconWrap.innerHTML = '<i class="fas fa-exclamation-circle text-warning fa-2x"></i>';
+                infoEl.innerHTML = '<span class="text-muted small">Weather unavailable.</span>';
+            });
+    }
+
+    window.fetchWeather = fetchWeather;
+    document.addEventListener('DOMContentLoaded', function () { fetchWeather(null); });
+    var form = document.getElementById('weather-city-form');
+    if (form) form.addEventListener('submit', fetchWeather);
+}());
+</script>
 {% endblock %}

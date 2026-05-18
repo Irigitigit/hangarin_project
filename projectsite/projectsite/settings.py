@@ -11,10 +11,19 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
-from pathlib import Path 
+from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+_env_path = BASE_DIR / '.env'
+if _env_path.exists():
+    with open(_env_path, encoding='utf-8-sig') as _f:
+        for _line in _f:
+            _line = _line.strip()
+            if _line and not _line.startswith('#') and '=' in _line:
+                _k, _, _v = _line.partition('=')
+                os.environ[_k.strip()] = _v.strip()
 
 
 # Quick-start development settings - unsuitable for production
@@ -201,3 +210,5 @@ PWA_APP_ICONS_APPLE = [
 PWA_APP_DIR = 'ltr'
 PWA_APP_LANG = 'en-US'
 PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'static/js', 'serviceworker.js')
+
+OPENWEATHER_API_KEY = os.environ.get('OPENWEATHER_API_KEY', '')

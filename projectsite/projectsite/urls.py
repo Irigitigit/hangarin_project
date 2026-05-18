@@ -23,6 +23,7 @@ urlpatterns = [
     path('', views.home_view, name='home'),
     path("accounts/", include("allauth.urls")),
     path('about/', views.about_view, name='about'),
+    path('weather/', views.weather_view, name='weather'),
     path('', include('pwa.urls')),
     
     # Task URLs

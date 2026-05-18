@@ -9,6 +9,9 @@ from django.db.models import Q
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import EmptyPage, PageNotAnInteger
+from django.http import JsonResponse
+from django.conf import settings
+import requests as http_requests
 
 
 class SafePaginationMixin:
@@ -47,6 +50,42 @@ def home_view(request):
 
 def about_view(request):
     return render(request, 'about.html')
+
+
+# --- WEATHER ---
+@login_required
+def weather_view(request):
+    city = request.GET.get('city', '').strip()
+    if city:
+        request.session['weather_city'] = city
+    else:
+        city = request.session.get('weather_city', 'Manila')
+
+    api_key = settings.OPENWEATHER_API_KEY
+    if not api_key:
+        return JsonResponse({'error': 'Weather API key is not configured. Check your .env file.'}, status=500)
+
+    try:
+        url = (
+            f'https://api.openweathermap.org/data/2.5/weather'
+            f'?q={city}&appid={api_key}&units=metric'
+        )
+        resp = http_requests.get(url, timeout=5)
+        data = resp.json()
+        if resp.status_code != 200:
+            return JsonResponse({'error': data.get('message', 'City not found.')}, status=400)
+        return JsonResponse({
+            'city': data['name'],
+            'country': data['sys']['country'],
+            'temp': round(data['main']['temp']),
+            'feels_like': round(data['main']['feels_like']),
+            'description': data['weather'][0]['description'].title(),
+            'icon': data['weather'][0]['icon'],
+            'humidity': data['main']['humidity'],
+            'wind': round(data['wind']['speed']),
+        })
+    except http_requests.RequestException:
+        return JsonResponse({'error': 'Could not reach weather service.'}, status=503)
 
 
 # --- TASK CRUD ---
