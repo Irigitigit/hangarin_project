@@ -1,169 +1,166 @@
 {% extends 'base.html' %}
 
-{% block content %} 
-<div class="card shadow border-0">
-    <div class="card-header border-0 bg-transparent">
-        <div class="row align-items-center">
-            <div class="col">
-                <h3 class="mb-0 text-uppercase ls-1">Subtasks</h3>
+{% block content %}
+<div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+
+  <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+    <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">Subtasks</h3>
+    <a href="{% url 'subtask_add' %}"
+       class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition-colors shadow-sm">
+      <i class="fas fa-plus"></i> Add Subtask
+    </a>
+  </div>
+
+  <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+    <form method="get" class="flex flex-wrap gap-3">
+      <div class="flex rounded-lg overflow-hidden border border-slate-300 dark:border-slate-600 shadow-sm flex-1 min-w-[180px]">
+        <span class="px-3 bg-white dark:bg-slate-700 border-r border-slate-300 dark:border-slate-600 flex items-center text-slate-400 text-sm">
+          <i class="fas fa-search"></i>
+        </span>
+        <input type="text" name="q"
+               class="px-3 py-2 text-sm bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none flex-1"
+               placeholder="Search subtasks…" value="{{ request.GET.q }}">
+      </div>
+
+      <select name="status" onchange="this.form.submit()"
+              class="px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm">
+        <option value="">All Statuses</option>
+        <option value="Pending" {% if request.GET.status == "Pending" %}selected{% endif %}>Pending</option>
+        <option value="In Progress" {% if request.GET.status == "In Progress" %}selected{% endif %}>In Progress</option>
+        <option value="Completed" {% if request.GET.status == "Completed" %}selected{% endif %}>Completed</option>
+      </select>
+
+      <select name="parent" onchange="this.form.submit()"
+              class="px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm">
+        <option value="">All Parent Tasks</option>
+        {% for task in parent_tasks %}
+        <option value="{{ task.id }}" {% if request.GET.parent == task.id|stringformat:"i" %}selected{% endif %}>{{ task.title }}</option>
+        {% endfor %}
+      </select>
+    </form>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full">
+      <thead>
+        <tr class="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+          <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Subtask Name</th>
+          <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Parent Task</th>
+          <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Status</th>
+          <th class="text-right px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Actions</th>
+        </tr>
+      </thead>
+
+      {% for item in items %}
+      <tbody x-data="{ open: false }" class="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/20 transition-colors">
+        <tr>
+          <td class="px-5 py-3.5">
+            <button @click="open = true" class="text-sm font-semibold text-slate-800 dark:text-slate-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-left cursor-pointer">
+              {{ item.title }}
+            </button>
+          </td>
+          <td class="px-5 py-3.5">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-400">{{ item.parent_task.title }}</span>
+          </td>
+          <td class="px-5 py-3.5">
+            {% if item.status == 'Completed' %}
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400">
+                <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Completed
+              </span>
+            {% elif item.status == 'In Progress' %}
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400">
+                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> In Progress
+              </span>
+            {% else %}
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Pending
+              </span>
+            {% endif %}
+          </td>
+          <td class="px-5 py-3.5 text-right">
+            <div class="flex items-center justify-end gap-1.5">
+              <a href="{% url 'subtask_edit' item.pk %}"
+                 class="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors" title="Edit">
+                <i class="fas fa-edit text-sm"></i>
+              </a>
+              <a href="{% url 'subtask_delete' item.pk %}"
+                 class="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" title="Delete">
+                <i class="fas fa-trash text-sm"></i>
+              </a>
             </div>
-            <div class="col text-right">
-                <a href="{% url 'subtask_add' %}" class="btn btn-sm btn-primary shadow-sm">
-                    <i class="fas fa-plus mr-1"></i> Add Subtask
+          </td>
+        </tr>
+
+        <template x-teleport="body">
+          <div x-show="open"
+               x-transition:enter="transition ease-out duration-200"
+               x-transition:enter-start="opacity-0"
+               x-transition:enter-end="opacity-100"
+               x-transition:leave="transition ease-in duration-150"
+               x-transition:leave-start="opacity-100"
+               x-transition:leave-end="opacity-0"
+               class="fixed inset-0 z-50 flex items-center justify-center p-4"
+               style="display:none;">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="open = false"></div>
+            <div x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-slate-700 z-10">
+              <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+                <h5 class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Subtask Details</h5>
+                <button @click="open = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+              <div class="p-6 text-center">
+                <h2 class="text-xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">{{ item.title }}</h2>
+                <p class="text-xs text-slate-400 dark:text-slate-500 mb-1">Part of:</p>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-400">{{ item.parent_task.title }}</span>
+                <hr class="border-slate-200 dark:border-slate-700 my-5">
+                <div class="mb-4">
+                  <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Current Status</p>
+                  {% if item.status == 'Completed' %}
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400">Completed</span>
+                  {% elif item.status == 'In Progress' %}
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400">In Progress</span>
+                  {% else %}
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400">Pending</span>
+                  {% endif %}
+                </div>
+                <div>
+                  <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">Created on</p>
+                  <p class="text-sm text-slate-600 dark:text-slate-300">
+                    <i class="ni ni-calendar-grid-58 mr-1"></i>{{ item.created_at|date:"M d, Y" }}
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center justify-between px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 rounded-b-2xl">
+                <a href="{% url 'subtask_edit' item.pk %}"
+                   class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition-colors">
+                  Edit Subtask
                 </a>
+                <button @click="open = false"
+                        class="px-4 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold transition-colors">
+                  Close
+                </button>
+              </div>
             </div>
-        </div>
-    </div>
+          </div>
+        </template>
+      </tbody>
+      {% empty %}
+      <tbody>
+        <tr>
+          <td colspan="4" class="text-center py-16">
+            <i class="ni ni-bullet-list-67 text-slate-300 dark:text-slate-600 text-4xl block mb-3"></i>
+            <p class="text-sm text-slate-400 dark:text-slate-500">No subtasks found.</p>
+          </td>
+        </tr>
+      </tbody>
+      {% endfor %}
+    </table>
+  </div>
 
-    <div class="px-4 pb-3">
-        <form method="get" class="row g-2 align-items-center">
-            <div class="col-md-4">
-                <div class="input-group input-group-alternative shadow-sm">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text"><i class="fas fa-search"></i></span>
-                    </div>
-                    <input type="text" name="q" class="form-control" placeholder="Search subtasks..." value="{{ request.GET.q }}">
-                </div>
-            </div>
-            <div class="col-md-4">
-                <select name="status" class="form-control form-control-alternative shadow-sm" onchange="this.form.submit()">
-                    <option value="">All Statuses</option>
-                    <option value="Pending" {% if request.GET.status == "Pending" %}selected{% endif %}>Pending</option>
-                    <option value="In Progress" {% if request.GET.status == "In Progress" %}selected{% endif %}>In Progress</option>
-                    <option value="Completed" {% if request.GET.status == "Completed" %}selected{% endif %}>Completed</option>
-                </select>
-            </div>
-            <div class="col-md-4">
-                <select name="parent" class="form-control form-control-alternative shadow-sm" onchange="this.form.submit()">
-                    <option value="">All Parent Tasks</option>
-                    {% for task in parent_tasks %}
-                        <option value="{{ task.id }}" {% if request.GET.parent == task.id|stringformat:"i" %}selected{% endif %}>{{ task.title }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </form>
-    </div>
-
-    <div class="table-responsive">
-        <table class="table align-items-center table-flush">
-            <thead class="thead-light">
-                <tr>
-                    <th scope="col">Subtask Name</th>
-                    <th scope="col">Parent Task</th>
-                    <th scope="col">Status</th>
-                    <th scope="col" class="text-right">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="list">
-                {% for item in items %}
-                <tr class="hover-shadow-sm transition-300">
-                    <td class="font-weight-600">
-                        <a href="javascript:void(0)" data-toggle="modal" data-target="#subtaskModal-{{ item.pk }}" class="text-primary" style="text-decoration: none;">
-                            <div class="media align-items-center">
-                                <span class="mb-0 text-sm font-weight-bold subtask-title-cell">{{ item.title }}</span>
-                            </div>
-                        </a>
-                    </td>
-                    <td>
-                        <span class="badge badge-info badge-pill shadow-none">{{ item.parent_task.title }}</span>
-                    </td>
-                    <td>
-                        {% if item.status == 'Completed' %}
-                            <span class="badge badge-dot mr-4"><i class="bg-success"></i> Completed</span>
-                        {% elif item.status == 'In Progress' %}
-                            <span class="badge badge-dot mr-4"><i class="bg-info"></i> In Progress</span>
-                        {% else %}
-                            <span class="badge badge-dot mr-4"><i class="bg-warning"></i> Pending</span>
-                        {% endif %}
-                    </td>
-                    <td class="text-right">
-                        <div class="btn-group">
-                            <a href="{% url 'subtask_edit' item.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
-                            <a href="{% url 'subtask_delete' item.pk %}" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>
-                        </div>
-                    </td>   
-                </tr>
-
-                <div class="modal fade" id="subtaskModal-{{ item.pk }}" tabindex="-1" role="dialog" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered" role="document">
-                        <div class="modal-content border-0 shadow-lg">
-                            <div class="modal-header custom-modal-header">
-                                <h5 class="modal-title text-uppercase ls-1">Subtask Details</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div class="modal-body p-4">
-                                <div class="mb-4 text-center">
-                                    <h2 class="display-4 mb-1 text-primary">{{ item.title }}</h2>
-                                    <small class="text-muted">Part of: </small>
-                                    <span class="badge badge-pill badge-info">{{ item.parent_task.title }}</span>
-                                </div>
-                                <hr class="my-3">
-                                <div class="row mb-3 text-center">
-                                    <div class="col-12">
-                                        <small class="text-muted text-uppercase d-block mb-1">Current Status</small>
-                                        <span class="badge badge-pill {% if item.status == 'Completed' %}badge-success{% else %}badge-warning{% endif %}">
-                                            {{ item.status }}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <small class="text-muted text-uppercase font-weight-bold">Notes / Description</small>
-                                    <p class="mt-1 text-sm modal-description">{{ item.description|default:"No details provided for this subtask." }}</p>
-                                </div>
-                                <div class="text-center mt-4">
-                                    <small class="text-muted text-uppercase d-block mb-1">Created on</small>
-                                    <span class="text-sm modal-info-text"><i class="ni ni-calendar-grid-58 mr-1"></i> {{ item.created_at|date:"M d, Y" }}</span>
-                                </div>
-                            </div>
-                            <div class="modal-footer custom-modal-footer">
-                                <a href="{% url 'subtask_edit' item.pk %}" class="btn btn-sm btn-primary">Edit Subtask</a>
-                                <button type="button" class="btn btn-sm btn-link text-muted ml-auto" data-dismiss="modal">Close</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {% empty %}
-                <tr>
-                    <td colspan="4" class="text-center py-5">No subtasks found.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% include 'includes/pagination.html' %}
+  {% include 'includes/pagination.html' %}
 </div>
-
-<style>
-    /* Table Link Visibility */
-    .subtask-title-cell { color: #32325d; }
-    .dark-mode .subtask-title-cell { color: #ffffff !important; }
-
-    /* Modal Dark Mode Overrides */
-    .dark-mode .modal-content {
-        background-color: #1c1c44 !important;
-        border: 1px solid #2e2e5d !important;
-    }
-
-    .dark-mode .custom-modal-header, 
-    .dark-mode .custom-modal-footer {
-        background-color: #171738 !important;
-        border: 0;
-    }
-
-    .dark-mode .modal-header .close {
-        color: #fff;
-        opacity: 0.5;
-    }
-
-    .dark-mode .modal-info-text { color: #ffffff !important; }
-    .dark-mode .modal-description { color: #adb5bd !important; }
-
-    /* Light Mode Modal Styling */
-    .custom-modal-header, .custom-modal-footer {
-        background-color: #f7f8f9;
-    }
-</style>
 {% endblock %}

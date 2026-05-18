@@ -1,233 +1,210 @@
 {% extends 'base.html' %}
 
-{% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card border-0 shadow-sm px-4 py-3" id="weather-widget">
-            <div class="d-flex align-items-center flex-wrap" style="gap: 1rem;">
-                <div id="weather-icon-wrap">
-                    <div class="spinner-border spinner-border-sm text-muted" role="status"></div>
-                </div>
-                <div id="weather-info" class="flex-grow-1">
-                    <span class="text-muted small">Loading weather...</span>
-                </div>
-                <form id="weather-city-form" class="d-flex align-items-center" style="gap: 0.5rem;" onsubmit="fetchWeather(event)">
-                    <div class="input-group input-group-sm" style="width: 200px;">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
-                        </div>
-                        <input type="text" id="weather-city-input" class="form-control form-control-sm" placeholder="City..." autocomplete="off">
-                    </div>
-                    <button class="btn btn-sm btn-primary" type="submit"><i class="fas fa-search"></i></button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row mb-4">
-    <div class="col-xl-4 col-md-6">
-        <div class="card card-stats shadow-sm border-0 transition-300">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col">
-                        <h5 class="card-title text-uppercase text-muted mb-0">Total Tasks</h5>
-                        <span class="h2 font-weight-bold mb-0 text-primary">{{ total_tasks }}</span>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon icon-shape bg-gradient-primary text-white rounded-circle shadow">
-                            <i class="ni ni-check-bold"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-4 col-md-6">
-        <div class="card card-stats shadow-sm border-0 transition-300">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col">
-                        <h5 class="card-title text-uppercase text-muted mb-0">Active Categories</h5>
-                        <span class="h2 font-weight-bold mb-0 text-info">{{ total_categories }}</span>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon icon-shape bg-gradient-info text-white rounded-circle shadow">
-                            <i class="ni ni-tag"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-4 col-md-12">
-        <div class="card card-stats shadow-sm border-0 transition-300">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col">
-                        <h5 class="card-title text-uppercase text-muted mb-0">Saved Notes</h5>
-                        <span class="h2 font-weight-bold mb-0 text-yellow">{{ total_notes }}</span>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon icon-shape bg-gradient-yellow text-white rounded-circle shadow">
-                            <i class="ni ni-paper-diploma"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-xl-4">
-        <div class="card shadow border-0 h-100">
-            <div class="card-header bg-transparent border-0">
-                <h3 class="mb-0 text-uppercase ls-1"><i class="ni ni-time-alarm text-danger mr-2"></i>Due Soon</h3>
-            </div>
-            <div class="card-body pt-0">
-                {% if urgent_tasks %}
-                    {% for task in urgent_tasks %}
-                    <div class="alert alert-secondary border-left-danger mb-3 shadow-sm transition-300">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h4 class="mb-0 font-weight-bold">{{ task.title }}</h4>
-                            <span class="badge badge-danger">{{ task.deadline|date:"M d" }}</span>
-                        </div>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="text-center py-5">
-                        <i class="ni ni-satisfied text-muted mb-2" style="font-size: 2rem;"></i>
-                        <p class="text-muted">No urgent deadlines.</p>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-8">
-        <div class="card shadow border-0 h-100">
-            <div class="card-header bg-transparent border-0">
-                <div class="row align-items-center">
-                    <div class="col">
-                        <h3 class="mb-0 text-uppercase ls-1"><i class="ni ni-favourite-28 text-red mr-2"></i>Critical Focus</h3>
-                    </div>
-                    <div class="col text-right">
-                        <a href="{% url 'task_list' %}" class="btn btn-sm btn-outline-primary">View All Tasks</a>
-                    </div>
-                </div>
-            </div>
-            <div class="table-responsive">
-                <table class="table align-items-center table-flush table-hover">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>Task Title</th>
-                            <th>Priority / Category</th>
-                            <th class="text-center">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="list">
-                        {% for task in my_tasks %}
-                        <tr>
-                            <th scope="row">
-                                <span class="name mb-0 text-sm font-weight-bold text-dark">{{ task.title }}</span>
-                            </th>
-                            <td>
-                                <span class="badge badge-dot mr-4">
-                                    {% if task.priority.name|lower == 'critical' %}
-                                        <i class="bg-danger"></i>
-                                    {% else %}
-                                        <i class="bg-warning"></i>
-                                    {% endif %}
-                                    <span class="status">{{ task.priority.name }}</span>
-                                </span>
-                                <small class="text-muted d-block">{{ task.category.name }}</small>
-                            </td>
-                            <td class="text-center">
-                                {% if task.status|lower == 'pending' %}
-                                    <span class="badge badge-pill badge-warning">Pending</span>
-                                {% else %}
-                                    <span class="badge badge-pill badge-secondary">{{ task.status }}</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="3" class="text-center py-5">
-                                <div class="text-muted">
-                                    <i class="ni ni-bulb-61 text-warning mb-3" style="font-size: 2rem;"></i>
-                                    <p>No High or Critical tasks found.</p>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-
+{% block extra_styles %}
 <style>
-    .transition-300 { transition: all 0.3s ease; }
-    .card-stats:hover { transform: translateY(-5px); }
-    .border-left-danger { border-left: 4px solid #f5365c !important; }
-    .dark-mode .card-stats { background-color: #262161 !important; }
-    .dark-mode .text-dark { color: #ffffff !important; }
-
-    #weather-widget { border-left: 4px solid #5e72e4 !important; }
-    .dark-mode #weather-widget { background-color: #262161 !important; }
-    .weather-temp { font-size: 1.8rem; font-weight: 700; line-height: 1; }
-    .weather-desc { font-size: 0.85rem; color: #8898aa; }
-    .dark-mode .weather-desc { color: #adb5bd; }
-    .weather-meta { font-size: 0.8rem; color: #8898aa; }
-    .dark-mode .weather-meta { color: #adb5bd; }
-    .weather-city { font-weight: 600; font-size: 1rem; }
+  .weather-city { font-weight:600; font-size:1rem; color:#1e293b; }
+  .weather-temp { font-size:1.7rem; font-weight:700; line-height:1; color:#1e293b; }
+  .weather-desc { font-size:0.85rem; color:#64748b; }
+  .weather-meta { font-size:0.78rem; color:#94a3b8; margin-top:4px; }
+  html.dark .weather-city,
+  html.dark .weather-temp { color:#f1f5f9; }
+  html.dark .weather-desc { color:#94a3b8; }
+  html.dark .weather-meta { color:#64748b; }
 </style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Stat cards -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+  <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
+    <div class="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center flex-shrink-0">
+      <i class="ni ni-check-bold text-indigo-500 dark:text-indigo-400 text-lg"></i>
+    </div>
+    <div>
+      <p class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-0.5">Total Tasks</p>
+      <p class="text-3xl font-bold text-slate-800 dark:text-slate-100">{{ total_tasks }}</p>
+    </div>
+  </div>
+
+  <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
+    <div class="w-12 h-12 rounded-xl bg-sky-50 dark:bg-sky-500/10 flex items-center justify-center flex-shrink-0">
+      <i class="ni ni-tag text-sky-500 dark:text-sky-400 text-lg"></i>
+    </div>
+    <div>
+      <p class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-0.5">Active Categories</p>
+      <p class="text-3xl font-bold text-slate-800 dark:text-slate-100">{{ total_categories }}</p>
+    </div>
+  </div>
+
+  <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
+    <div class="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center flex-shrink-0">
+      <i class="ni ni-paper-diploma text-amber-500 dark:text-amber-400 text-lg"></i>
+    </div>
+    <div>
+      <p class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-0.5">Saved Notes</p>
+      <p class="text-3xl font-bold text-slate-800 dark:text-slate-100">{{ total_notes }}</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- Weather widget -->
+<div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 border-l-4 border-l-indigo-500">
+  <!-- Row 1: icon + info -->
+  <div class="flex items-start gap-3 mb-3">
+    <div id="weather-icon-wrap" class="flex-shrink-0 mt-1">
+      <div class="spinner-border spinner-border-sm" style="color:#94a3b8;" role="status"></div>
+    </div>
+    <div id="weather-info" class="flex-1 min-w-0 text-sm text-slate-500 dark:text-slate-400">
+      Loading weather…
+    </div>
+  </div>
+  <!-- Row 2: city search -->
+  <form id="weather-city-form" class="flex items-center gap-2" onsubmit="fetchWeather(event)">
+    <div class="flex rounded-lg overflow-hidden border border-slate-300 dark:border-slate-600 shadow-sm flex-1">
+      <span class="px-3 bg-slate-50 dark:bg-slate-700 border-r border-slate-300 dark:border-slate-600 flex items-center text-slate-400 flex-shrink-0">
+        <i class="fas fa-map-marker-alt text-xs"></i>
+      </span>
+      <input type="text" id="weather-city-input"
+             class="px-3 py-2 text-sm bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none flex-1 min-w-0"
+             placeholder="Enter city…" autocomplete="off">
+    </div>
+    <button type="submit"
+            class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm transition-colors flex-shrink-0">
+      <i class="fas fa-search text-xs"></i>
+    </button>
+  </form>
+</div>
+
+<!-- Due Soon + Critical Focus -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+  <!-- Due Soon -->
+  <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col">
+    <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center gap-2">
+      <i class="ni ni-time-alarm text-red-500"></i>
+      <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100">Due Soon</h3>
+    </div>
+    <div class="p-4 flex-1 space-y-2">
+      {% if urgent_tasks %}
+        {% for task in urgent_tasks %}
+        <div class="flex items-center justify-between px-3 py-2.5 rounded-xl border-l-4 border-l-red-400 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20">
+          <span class="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate mr-2">{{ task.title }}</span>
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex-shrink-0">
+            {{ task.deadline|date:"M d" }}
+          </span>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="flex flex-col items-center justify-center py-10 text-center">
+          <i class="ni ni-satisfied text-slate-300 dark:text-slate-600 text-4xl mb-2"></i>
+          <p class="text-sm text-slate-400 dark:text-slate-500">No urgent deadlines.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Critical Focus table -->
+  <div class="xl:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col">
+    <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <i class="ni ni-favourite-28 text-red-500"></i>
+        <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100">Critical Focus</h3>
+      </div>
+      <a href="{% url 'task_list' %}"
+         class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">View All →</a>
+    </div>
+    <div class="overflow-x-auto flex-1">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+            <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Task Title</th>
+            <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Priority / Category</th>
+            <th class="text-center px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+          {% for task in my_tasks %}
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+            <td class="px-5 py-3.5 text-sm font-semibold text-slate-800 dark:text-slate-100">{{ task.title }}</td>
+            <td class="px-5 py-3.5">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold
+                {% if task.priority.name|lower == 'critical' %}bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400
+                {% else %}bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400{% endif %}">
+                {{ task.priority.name }}
+              </span>
+              <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{{ task.category.name }}</p>
+            </td>
+            <td class="px-5 py-3.5 text-center">
+              {% if task.status|lower == 'pending' %}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400">Pending</span>
+              {% elif task.status|lower == 'in progress' %}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400">In Progress</span>
+              {% else %}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400">{{ task.status }}</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="3" class="text-center py-12">
+              <i class="ni ni-bulb-61 text-slate-300 dark:text-slate-600 text-4xl block mb-2"></i>
+              <p class="text-sm text-slate-400 dark:text-slate-500">No high or critical tasks found.</p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
 
 <script>
 (function () {
-    function fetchWeather(e) {
-        if (e) e.preventDefault();
-        var cityInput = document.getElementById('weather-city-input');
-        var city = cityInput ? cityInput.value.trim() : '';
-        var url = '/weather/' + (city ? '?city=' + encodeURIComponent(city) : '');
+  function fetchWeather(e) {
+    if (e) e.preventDefault();
+    var cityInput = document.getElementById('weather-city-input');
+    var city = cityInput ? cityInput.value.trim() : '';
+    var url = '/weather/' + (city ? '?city=' + encodeURIComponent(city) : '');
+    var iconWrap = document.getElementById('weather-icon-wrap');
+    var infoEl = document.getElementById('weather-info');
+    iconWrap.innerHTML = '<div class="spinner-border spinner-border-sm" style="color:#94a3b8;" role="status"></div>';
+    infoEl.innerHTML = '<span style="color:#94a3b8;font-size:0.875rem;">Loading…</span>';
 
-        var iconWrap = document.getElementById('weather-icon-wrap');
-        var infoEl = document.getElementById('weather-info');
-        iconWrap.innerHTML = '<div class="spinner-border spinner-border-sm text-muted" role="status"></div>';
-        infoEl.innerHTML = '<span class="text-muted small">Loading...</span>';
+    fetch(url, { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.error) {
+          iconWrap.innerHTML = '<i class="fas fa-exclamation-circle" style="color:#ef4444;font-size:1.5rem;"></i>';
+          infoEl.innerHTML = '<span style="color:#ef4444;font-size:0.875rem;">' + d.error + '</span>';
+          return;
+        }
+        if (cityInput) cityInput.value = '';
+        iconWrap.innerHTML = '<img src="https://openweathermap.org/img/wn/' + d.icon + '@2x.png" width="52" height="52" alt="">';
+        infoEl.innerHTML =
+          '<span class="weather-city">' + d.city + ', ' + d.country + '</span>' +
+          ' <span class="weather-temp" style="margin-left:0.75rem;">' + d.temp + '°C</span>' +
+          ' <span class="weather-desc" style="margin-left:0.5rem;">' + d.description + '</span>' +
+          '<div class="weather-meta">' +
+          '<i class="fas fa-thermometer-half" style="margin-right:4px;"></i>Feels like ' + d.feels_like + '°C &nbsp;' +
+          '<i class="fas fa-tint" style="margin-right:4px;"></i>' + d.humidity + '% &nbsp;' +
+          '<i class="fas fa-wind" style="margin-right:4px;"></i>' + d.wind + ' m/s' +
+          '</div>';
+      })
+      .catch(function () {
+        iconWrap.innerHTML = '<i class="fas fa-exclamation-circle" style="color:#f59e0b;font-size:1.5rem;"></i>';
+        infoEl.innerHTML = '<span style="color:#94a3b8;font-size:0.875rem;">Weather unavailable.</span>';
+      });
+  }
 
-        fetch(url, { credentials: 'same-origin' })
-            .then(function (r) { return r.json(); })
-            .then(function (d) {
-                if (d.error) {
-                    iconWrap.innerHTML = '<i class="fas fa-exclamation-circle text-danger fa-2x"></i>';
-                    infoEl.innerHTML = '<span class="text-danger small">' + d.error + '</span>';
-                    return;
-                }
-                if (cityInput) cityInput.value = '';
-                iconWrap.innerHTML = '<img src="https://openweathermap.org/img/wn/' + d.icon + '@2x.png" width="56" height="56" alt="">';
-                infoEl.innerHTML =
-                    '<span class="weather-city">' + d.city + ', ' + d.country + '</span>' +
-                    '<span class="weather-temp ml-3">' + d.temp + '°C</span>' +
-                    '<span class="weather-desc ml-2">' + d.description + '</span>' +
-                    '<div class="weather-meta mt-1">' +
-                    '<i class="fas fa-thermometer-half mr-1"></i>Feels like ' + d.feels_like + '°C &nbsp;' +
-                    '<i class="fas fa-tint mr-1"></i>' + d.humidity + '% &nbsp;' +
-                    '<i class="fas fa-wind mr-1"></i>' + d.wind + ' m/s' +
-                    '</div>';
-            })
-            .catch(function () {
-                iconWrap.innerHTML = '<i class="fas fa-exclamation-circle text-warning fa-2x"></i>';
-                infoEl.innerHTML = '<span class="text-muted small">Weather unavailable.</span>';
-            });
-    }
-
-    window.fetchWeather = fetchWeather;
-    document.addEventListener('DOMContentLoaded', function () { fetchWeather(null); });
-    var form = document.getElementById('weather-city-form');
-    if (form) form.addEventListener('submit', fetchWeather);
+  window.fetchWeather = fetchWeather;
+  document.addEventListener('DOMContentLoaded', function () { fetchWeather(null); });
+  var form = document.getElementById('weather-city-form');
+  if (form) form.addEventListener('submit', fetchWeather);
 }());
 </script>
+
 {% endblock %}

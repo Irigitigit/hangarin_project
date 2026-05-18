@@ -1,80 +1,61 @@
 {% extends 'base.html' %}
 
-{% block content %} 
-<div class="card shadow border-0">
-    <div class="card-header border-0 bg-transparent">
-        <div class="row align-items-center">
-            <div class="col">
-                <h3 class="mb-0 text-uppercase ls-1">Priority Levels</h3>
-            </div>
-            <div class="col text-right">
-                <a href="{% url 'priority_add' %}" class="btn btn-sm btn-primary shadow-sm">
-                    <i class="fas fa-plus mr-1"></i> Add Priority
-                </a>
-            </div>
-        </div>
-    </div>
+{% block content %}
+<div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
 
-    <div class="table-responsive">
-        <table class="table align-items-center table-flush">
-            <thead class="thead-light">
-                <tr>
-                    <th scope="col">Priority Name</th>
-                    <th scope="col" class="text-right">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="list">
-                {% for item in items %}
-                <tr class="hover-shadow-sm transition-300">
-                    <td class="font-weight-600 text-dark">
-                        <div class="media align-items-center">
-                            <span class="avatar avatar-xs rounded-circle bg-soft-red mr-3">
-                                <i class="ni ni-bullet-list-67 text-red" style="font-size: 0.7rem;"></i>
-                            </span>
-                            <span class="mb-0 text-sm">{{ item.name }}</span>
-                        </div>
-                    </td>
-                    <td class="text-right">
-                        <div class="btn-group">
-                            <a href="{% url 'priority_edit' item.pk %}" class="btn btn-sm btn-outline-primary" title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <a href="{% url 'priority_delete' item.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
-                                <i class="fas fa-trash"></i>
-                            </a>
-                        </div>
-                    </td>   
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="2" class="text-center py-6 bg-secondary-soft">
-                        <div class="empty-state">
-                            <i class="ni ni-active-40 text-muted mb-3" style="font-size: 3rem; display: block;"></i>
-                            <h4 class="text-muted font-weight-light">No priorities set.</h4>
-                            <p class="text-sm text-muted">Define levels like "High", "Medium", or "Low" to organize tasks.</p>
-                            <a href="{% url 'priority_add' %}" class="btn btn-link text-primary mt-2">Create New Priority</a>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+  <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+    <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">Priority Levels</h3>
+    <a href="{% url 'priority_add' %}"
+       class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition-colors shadow-sm">
+      <i class="fas fa-plus"></i> Add Priority
+    </a>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full">
+      <thead>
+        <tr class="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+          <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Priority Name</th>
+          <th class="text-right px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+        {% for item in items %}
+        <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/20 transition-colors">
+          <td class="px-5 py-3.5">
+            <div class="flex items-center gap-3">
+              <span class="w-7 h-7 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center flex-shrink-0">
+                <i class="ni ni-bullet-list-67 text-red-500 dark:text-red-400 text-xs"></i>
+              </span>
+              <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">{{ item.name }}</span>
+            </div>
+          </td>
+          <td class="px-5 py-3.5 text-right">
+            <div class="flex items-center justify-end gap-1.5">
+              <a href="{% url 'priority_edit' item.pk %}"
+                 class="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors" title="Edit">
+                <i class="fas fa-edit text-sm"></i>
+              </a>
+              <a href="{% url 'priority_delete' item.pk %}"
+                 class="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" title="Delete">
+                <i class="fas fa-trash text-sm"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="2" class="text-center py-16">
+            <i class="ni ni-active-40 text-slate-300 dark:text-slate-600 text-4xl block mb-3"></i>
+            <p class="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-1">No priorities set.</p>
+            <p class="text-xs text-slate-400 dark:text-slate-500 mb-4">Define levels like "High", "Medium", or "Low" to organize tasks.</p>
+            <a href="{% url 'priority_add' %}" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">Create New Priority →</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
 </div>
-
-<style>
-    /* Smoothness & Consistency */
-    .transition-300 { transition: all 0.3s ease; }
-    .hover-shadow-sm:hover { 
-        background-color: rgba(94, 114, 228, 0.03); 
-    }
-    .bg-soft-red { background-color: #fceaea; }
-    
-    /* Dark Mode Adjustments */
-    .dark-mode .bg-soft-red { background-color: #4d2b2b; }
-    .dark-mode .text-dark { color: #ffffff !important; }
-    .dark-mode .bg-secondary-soft { background-color: #1a174d; }
-    
-    .dark-mode .card-header { border-bottom: 1px solid #32325d !important; }
-</style>
 {% endblock %}

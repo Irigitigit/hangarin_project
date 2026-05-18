@@ -1,208 +1,196 @@
 {% extends 'base.html' %}
 
-{% block content %} 
-<div class="card shadow border-0">
-    <div class="card-header border-0 bg-transparent">
-        <div class="row align-items-center">
-            <div class="col">
-                <h3 class="mb-0 text-uppercase ls-1">Tasklist</h3>
+{% block content %}
+<div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+
+  <!-- Card header -->
+  <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+    <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">Tasklist</h3>
+    <a href="{% url 'task_add' %}"
+       class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition-colors shadow-sm">
+      <i class="fas fa-plus"></i> Add Task
+    </a>
+  </div>
+
+  <!-- Filters -->
+  <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+    <form method="get" class="flex flex-wrap gap-3">
+      <div class="flex rounded-lg overflow-hidden border border-slate-300 dark:border-slate-600 shadow-sm flex-1 min-w-[180px]">
+        <span class="px-3 bg-white dark:bg-slate-700 border-r border-slate-300 dark:border-slate-600 flex items-center text-slate-400 text-sm">
+          <i class="fas fa-search"></i>
+        </span>
+        <input type="text" name="q"
+               class="px-3 py-2 text-sm bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none flex-1"
+               placeholder="Search tasks…" value="{{ request.GET.q }}">
+        <button type="submit" class="px-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm transition-colors">
+          <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+
+      <select name="status" onchange="this.form.submit()"
+              class="px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm">
+        <option value="">All Statuses</option>
+        <option value="Pending" {% if request.GET.status == "Pending" %}selected{% endif %}>Pending</option>
+        <option value="In Progress" {% if request.GET.status == "In Progress" %}selected{% endif %}>In Progress</option>
+        <option value="Completed" {% if request.GET.status == "Completed" %}selected{% endif %}>Completed</option>
+      </select>
+
+      <select name="category" onchange="this.form.submit()"
+              class="px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm">
+        <option value="">All Categories</option>
+        {% for cat in categories %}
+        <option value="{{ cat.name }}" {% if request.GET.category == cat.name %}selected{% endif %}>{{ cat.name }}</option>
+        {% endfor %}
+      </select>
+
+      <select name="priority" onchange="this.form.submit()"
+              class="px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm">
+        <option value="">All Priorities</option>
+        {% for pri in priorities %}
+        <option value="{{ pri.name }}" {% if request.GET.priority == pri.name %}selected{% endif %}>{{ pri.name }}</option>
+        {% endfor %}
+      </select>
+    </form>
+  </div>
+
+  <!-- Table -->
+  <div class="overflow-x-auto">
+    <table class="w-full">
+      <thead>
+        <tr class="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+          <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Task Name</th>
+          <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Category</th>
+          <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Priority</th>
+          <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Deadline</th>
+          <th class="text-right px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Actions</th>
+        </tr>
+      </thead>
+
+      {% for item in items %}
+      <tbody x-data="{ open: false }" class="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/20 transition-colors">
+        <tr>
+          <td class="px-5 py-3.5">
+            <button @click="open = true" class="text-left cursor-pointer group">
+              <span class="text-sm font-semibold text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors block">{{ item.title }}</span>
+              <span class="text-xs
+                {% if item.status == 'Pending' %}text-amber-500
+                {% elif item.status == 'In Progress' %}text-blue-500
+                {% else %}text-green-500{% endif %}">{{ item.status }}</span>
+            </button>
+          </td>
+          <td class="px-5 py-3.5">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-400">{{ item.category }}</span>
+          </td>
+          <td class="px-5 py-3.5">
+            {% if item.priority.name|lower == 'critical' %}
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400">CRITICAL</span>
+            {% elif item.priority.name|lower == 'high' %}
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400">High</span>
+            {% elif item.priority.name|lower == 'medium' %}
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400">Medium</span>
+            {% elif item.priority.name|lower == 'low' %}
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400">Low</span>
+            {% else %}
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">{{ item.priority.name }}</span>
+            {% endif %}
+          </td>
+          <td class="px-5 py-3.5 text-sm text-slate-500 dark:text-slate-400">
+            <span class="flex items-center gap-1.5">
+              <i class="ni ni-calendar-grid-58 text-slate-400 dark:text-slate-500 text-xs"></i>
+              {{ item.deadline|date:"M d, Y"|default:"—" }}
+            </span>
+          </td>
+          <td class="px-5 py-3.5 text-right">
+            <div class="flex items-center justify-end gap-1.5">
+              <a href="{% url 'task_update' item.pk %}"
+                 class="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors" title="Edit">
+                <i class="fas fa-edit text-sm"></i>
+              </a>
+              <a href="{% url 'task_delete' item.pk %}"
+                 class="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" title="Delete">
+                <i class="fas fa-trash text-sm"></i>
+              </a>
             </div>
-            <div class="col text-right">
-                <a href="{% url 'task_add' %}" class="btn btn-sm btn-primary shadow-sm">
-                    <i class="fas fa-plus mr-1"></i> Add Task
+          </td>
+        </tr>
+
+        <!-- Modal teleported to body -->
+        <template x-teleport="body">
+          <div x-show="open"
+               x-transition:enter="transition ease-out duration-200"
+               x-transition:enter-start="opacity-0"
+               x-transition:enter-end="opacity-100"
+               x-transition:leave="transition ease-in duration-150"
+               x-transition:leave-start="opacity-100"
+               x-transition:leave-end="opacity-0"
+               class="fixed inset-0 z-50 flex items-center justify-center p-4"
+               style="display:none;">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="open = false"></div>
+            <div x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-700 z-10">
+              <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+                <h5 class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Task Details</h5>
+                <button @click="open = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+              <div class="p-6">
+                <div class="text-center mb-5">
+                  <h2 class="text-xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">{{ item.title }}</h2>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-400">{{ item.category }}</span>
+                </div>
+                <hr class="border-slate-200 dark:border-slate-700 my-4">
+                <div class="grid grid-cols-2 gap-4 mb-4 text-center">
+                  <div class="border-r border-slate-200 dark:border-slate-700">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">Priority</p>
+                    <p class="text-sm font-bold text-slate-800 dark:text-slate-100">{{ item.priority }}</p>
+                  </div>
+                  <div>
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">Status</p>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400">{{ item.status }}</span>
+                  </div>
+                </div>
+                <div class="mb-4">
+                  <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5">Description</p>
+                  <p class="text-sm text-slate-600 dark:text-slate-300">{{ item.description|default:"No description provided." }}</p>
+                </div>
+                <div class="text-center">
+                  <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">Deadline</p>
+                  <p class="text-sm text-slate-600 dark:text-slate-300">
+                    <i class="ni ni-calendar-grid-58 mr-1"></i>{{ item.deadline|date:"M d, Y"|default:"No Deadline" }}
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center justify-between px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 rounded-b-2xl">
+                <a href="{% url 'task_update' item.pk %}"
+                   class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition-colors">
+                  Edit Task
                 </a>
+                <button @click="open = false"
+                        class="px-4 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold transition-colors">
+                  Close
+                </button>
+              </div>
             </div>
-        </div>
-    </div>
+          </div>
+        </template>
+      </tbody>
+      {% empty %}
+      <tbody>
+        <tr>
+          <td colspan="5" class="text-center py-16">
+            <i class="ni ni-check-bold text-slate-300 dark:text-slate-600 text-4xl block mb-3"></i>
+            <p class="text-sm text-slate-400 dark:text-slate-500">No tasks found.</p>
+          </td>
+        </tr>
+      </tbody>
+      {% endfor %}
 
-    <div class="px-4 pb-3">
-        <form method="get" class="row g-2 align-items-center">
-            <div class="col-md-3">
-                <div class="input-group input-group-alternative shadow-sm">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text"><i class="fas fa-search"></i></span>
-                    </div>
-                    <input type="text" name="q" class="form-control" placeholder="Search..." value="{{ request.GET.q }}">
-                    <div class="input-group-append">
-                        <button class="btn btn-primary px-3" type="submit">
-                            <i class="fas fa-arrow-right"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
+    </table>
+  </div>
 
-            <div class="col-md-3">
-                <select name="status" class="form-control form-control-alternative shadow-sm" onchange="this.form.submit()">
-                    <option value="">All Statuses</option>
-                    <option value="Pending" {% if request.GET.status == "Pending" %}selected{% endif %}>Pending</option>
-                    <option value="In Progress" {% if request.GET.status == "In Progress" %}selected{% endif %}>In Progress</option>
-                    <option value="Completed" {% if request.GET.status == "Completed" %}selected{% endif %}>Completed</option>
-                </select>
-            </div>
-
-            <div class="col-md-3">
-                <select name="category" class="form-control form-control-alternative shadow-sm" onchange="this.form.submit()">
-                    <option value="">All Categories</option>
-                    {% for cat in categories %}
-                    <option value="{{ cat.name }}" {% if request.GET.category == cat.name %}selected{% endif %}>{{ cat.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="col-md-3">
-                <select name="priority" class="form-control form-control-alternative shadow-sm" onchange="this.form.submit()">
-                    <option value="">All Priorities</option>
-                    {% for pri in priorities %}
-                    <option value="{{ pri.name }}" {% if request.GET.priority == pri.name %}selected{% endif %}>{{ pri.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </form>
-    </div>
-
-    <div class="table-responsive">
-        <table class="table align-items-center table-flush">
-            <thead class="thead-light">
-                <tr>
-                    <th scope="col">Task Name</th>
-                    <th scope="col">Category</th>
-                    <th scope="col">Priority</th>
-                    <th scope="col">Deadline</th>
-                    <th scope="col" class="text-right">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="list">
-                {% for item in items %}
-                <tr class="hover-shadow-sm transition-300">
-                    <td class="font-weight-600">
-                        <a href="javascript:void(0)" data-toggle="modal" data-target="#taskModal-{{ item.pk }}" class="text-primary" style="text-decoration: none;">
-                            <div class="media align-items-center">
-                                <div>
-                                    <span class="mb-0 text-sm d-block font-weight-bold task-title-cell">{{ item.title }}</span>
-                                    <small class="text-muted">{{ item.status }}</small>
-                                </div>
-                            </div>
-                        </a>
-                    </td>
-                    <td><span class="badge badge-info badge-pill shadow-none">{{ item.category }}</span></td>
-                    <td>
-                        {% if item.priority.name|lower == 'critical' %}
-                            <span class="badge badge-dot mr-4"><i class="bg-danger"></i> <b class="text-danger">CRITICAL</b></span>
-                        {% elif item.priority.name|lower == 'high' %}
-                            <span class="badge badge-dot mr-4"><i class="bg-orange"></i> High</span>
-                        {% elif item.priority.name|lower == 'medium' %}
-                            <span class="badge badge-dot mr-4"><i class="bg-warning"></i> Medium</span>
-                        {% elif item.priority.name|lower == 'low' %}
-                            <span class="badge badge-dot mr-4"><i class="bg-success"></i> Low</span>
-                        {% else %}
-                            <span class="badge badge-dot mr-4"><i class="bg-secondary"></i> Optional</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <div class="d-flex align-items-center text-sm">
-                            <i class="ni ni-calendar-grid-58 text-muted mr-2"></i>
-                            {{ item.deadline|date:"M d, Y" }}
-                        </div>
-                    </td>
-                    <td class="text-right">
-                        <div class="btn-group">
-                            <a href="{% url 'task_update' item.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
-                            <a href="{% url 'task_delete' item.pk %}" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>
-                        </div>
-                    </td>   
-                </tr>
-
-                <div class="modal fade" id="taskModal-{{ item.pk }}" tabindex="-1" role="dialog" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered" role="document">
-                        <div class="modal-content border-0 shadow-lg">
-                            <div class="modal-header custom-modal-header">
-                                <h5 class="modal-title text-uppercase ls-1">Task Details</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div class="modal-body p-4">
-                                <div class="mb-4 text-center">
-                                    <h2 class="display-4 mb-1 text-primary">{{ item.title }}</h2>
-                                    <span class="badge badge-pill badge-info">{{ item.category }}</span>
-                                </div>
-                                <hr class="my-3">
-                                <div class="row mb-3 text-center">
-                                    <div class="col-6 border-right">
-                                        <small class="text-muted text-uppercase d-block mb-1">Priority</small>
-                                        <span class="font-weight-bold modal-info-text">{{ item.priority }}</span>
-                                    </div>
-                                    <div class="col-6">
-                                        <small class="text-muted text-uppercase d-block mb-1">Status</small>
-                                        <span class="badge badge-pill badge-warning">{{ item.status }}</span>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <small class="text-muted text-uppercase font-weight-bold">Description</small>
-                                    <p class="mt-1 text-sm modal-description">{{ item.description|default:"No description provided." }}</p>
-                                </div>
-                                <div class="mb-3">
-                                    <small class="text-muted text-uppercase font-weight-bold">Notes</small>
-                                    <p class="mt-1 text-sm italic text-muted">{{ item.note|default:"N/A" }}</p>
-                                </div>
-                                <div class="text-center mt-4">
-                                    <small class="text-muted text-uppercase d-block mb-1">Deadline</small>
-                                    <span class="text-sm modal-info-text"><i class="ni ni-calendar-grid-58 mr-1"></i>{{ item.deadline|date:"M d, Y"|default:"No Deadline" }}</span>
-                                </div>
-                            </div>
-                            <div class="modal-footer custom-modal-footer">
-                                <a href="{% url 'task_update' item.pk %}" class="btn btn-sm btn-primary">Edit Task</a>
-                                <button type="button" class="btn btn-sm btn-link text-muted ml-auto" data-dismiss="modal">Close</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center py-5">No tasks found.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% include 'includes/pagination.html' %}
+  {% include 'includes/pagination.html' %}
 </div>
-
-<style>
-    /* Table Text Fix */
-    .task-title-cell { color: #32325d; }
-    .dark-mode .task-title-cell { color: #ffffff !important; }
-
-    /* Modal Styling for Dark Mode */
-    .dark-mode .modal-content {
-        background-color: #1c1c44 !important;
-        border: 1px solid #2e2e5d !important;
-    }
-
-    .dark-mode .custom-modal-header, 
-    .dark-mode .custom-modal-footer {
-        background-color: #171738 !important;
-        border: 0;
-    }
-
-    .dark-mode .modal-header .close {
-        color: #fff;
-        text-shadow: none;
-        opacity: 0.5;
-    }
-
-    .dark-mode .modal-info-text {
-        color: #ffffff !important;
-    }
-
-    .dark-mode .modal-description {
-        color: #adb5bd !important;
-    }
-
-    /* Standard Header/Footer Colors for Light Mode */
-    .custom-modal-header, .custom-modal-footer {
-        background-color: #f7f8f9;
-    }
-</style>
 {% endblock %}

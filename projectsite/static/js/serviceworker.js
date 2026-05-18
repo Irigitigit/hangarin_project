@@ -26,7 +26,7 @@ self.addEventListener('fetch', function(e) {
     // Cache-first for static assets only
     if (url.pathname.startsWith('/static/') || url.pathname.startsWith('/staticfiles/')) {
         e.respondWith(
-            caches.open('hangarin-static-v2').then(function(cache) {
+            caches.open('hangarin-static-v3').then(function(cache) {
                 return caches.match(e.request).then(function(response) {
                     if (response) return response;
                     return fetch(e.request).then(function(networkResponse) {

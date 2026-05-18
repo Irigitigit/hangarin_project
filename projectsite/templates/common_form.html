@@ -2,22 +2,58 @@
 {% load widget_tweaks %}
 
 {% block content %}
-<div class="card bg-secondary shadow border-0">
-    <div class="card-header bg-white pb-3">
-        <h3 class="mb-0">Manage Entry</h3>
-    </div>
-    <div class="card-body px-lg-5 py-lg-5">
+<div class="flex justify-center">
+  <div class="w-full max-w-2xl">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+
+      <!-- Gradient header -->
+      <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-5">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fas fa-pen text-white/80"></i>
+          Manage Entry
+        </h3>
+      </div>
+
+      <div class="p-6">
         <form method="post">
-            {% csrf_token %}
-            {% for field in form %}
-            <div class="form-group">
-                <label class="form-control-label">{{ field.label }}</label>
-                {% render_field field class="form-control form-control-alternative" %}
-            </div>
-            {% endfor %}
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-            <a href="javascript:history.back()" class="btn btn-secondary btn-rounded">Cancel</a>
+          {% csrf_token %}
+          {% for field in form %}
+          <div class="mb-5">
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+              {{ field.label }}{% if field.field.required %}<span class="text-red-500 ml-1">*</span>{% endif %}
+            </label>
+            {% render_field field class="block w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" %}
+            {% if field.errors %}
+              {% for error in field.errors %}
+                <p class="text-red-500 dark:text-red-400 text-xs mt-1.5 flex items-center gap-1">
+                  <i class="fas fa-exclamation-circle text-xs"></i>{{ error }}
+                </p>
+              {% endfor %}
+            {% endif %}
+          </div>
+          {% endfor %}
+
+          {% if form.non_field_errors %}
+          <div class="mb-5 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm flex items-start gap-2">
+            <i class="fas fa-exclamation-triangle flex-shrink-0 mt-0.5"></i>
+            <div>{{ form.non_field_errors }}</div>
+          </div>
+          {% endif %}
+
+          <div class="flex items-center gap-3 pt-2">
+            <button type="submit"
+                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors shadow-sm">
+              <i class="fas fa-save text-xs"></i> Save Changes
+            </button>
+            <a href="javascript:history.back()"
+               class="px-5 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 text-sm font-semibold transition-colors">
+              Cancel
+            </a>
+          </div>
         </form>
+      </div>
+
     </div>
+  </div>
 </div>
 {% endblock %}
